@@ -65,7 +65,7 @@ namespace TicTacToe.View
         /// Utility for generating menus from their respective enums.
         /// </summary>
         /// <returns>Menu lines.</returns>
-        internal string[] Generate()
+        internal static string[] Generate()
         {
             return Enum.GetNames<TMenu>()
                     .Select(CaseConverter.PascalToTitle)
