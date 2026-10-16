@@ -54,8 +54,8 @@
                 throw new ArgumentException("Invalid letter!", nameof(letter));
             }
 
-            Letter = char.ToUpper(letter);
-            Name = name;
+            this.Letter = char.ToUpper(letter);
+            this.Name = name;
         }
 
         /// <summary>
@@ -89,7 +89,14 @@
         /// </summary>
         /// <value>true if the board state from the player's point of view matches any win condition; false otherwise.</value>
         public bool HasWon => WinConditions.Any(
-            condition => (State & condition) == condition);
+            condition => (this.State & condition) == condition);
+
+        /// <summary>
+        /// Gets a value indicating whether a given player is a human or not.
+        /// </summary>
+        /// <param name="player">The player in question.</param>
+        /// <returns>true if the player is a human; false if the player is a bot.</returns>
+        public static bool IsHuman(Player player) => player is HumanPlayer;
 
         /// <summary>
         /// Makes a move for the player based on the opponent's current state of the board.
@@ -107,7 +114,7 @@
         protected bool IsMarked(int square, int opponentState)
         {
             int bitFlag = IndividualBits[square];
-            return (State & bitFlag) != 0
+            return (this.State & bitFlag) != 0
                 || (opponentState & bitFlag) != 0;
         }
 
@@ -126,14 +133,14 @@
 
             int flag = 1 << spotIndex;
 
-            if ((State & flag) != 0)
+            if ((this.State & flag) != 0)
             {
                 throw new ArgumentException($"Spot {spotIndex} is already marked.", nameof(spotIndex));
             }
 
             // Mark the spot by setting the corresponding bit in the state integer.
-            State |= flag;
-            _markedSpots++;
+            this.State |= flag;
+            this._markedSpots++;
         }
     }
 }

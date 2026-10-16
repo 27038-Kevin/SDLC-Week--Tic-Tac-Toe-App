@@ -10,14 +10,7 @@ namespace TicTacToe.Models.StateMachines
     internal class Game
     {
         private readonly uint _gameNumber;
-
-        private readonly Player _xPlayer;
-        private readonly Player _oPlayer;
-
-        private readonly bool _isXHuman;
-        private readonly bool _isOHuman;
-
-        private readonly Action<int, int> _renderGameBoard;
+        private readonly Action<Game> _renderGameBoard;
 
         /// <summary>
         /// The current turn number.
@@ -37,15 +30,12 @@ namespace TicTacToe.Models.StateMachines
                 Player xPlayer,
                 Player oPlayer,
                 GameMode gameMode,
-                Action<int, int> renderGameBoard)
+                Action<Game> renderGameBoard)
         {
             this._gameNumber = gameNumber;
 
-            this._xPlayer = xPlayer;
-            this._oPlayer = oPlayer;
-
-            this._isXHuman = this._xPlayer is HumanPlayer;
-            this._isOHuman = this._oPlayer is HumanPlayer;
+            this.XPlayer = xPlayer;
+            this.OPlayer = oPlayer;
 
             this._renderGameBoard = renderGameBoard;
 
@@ -53,6 +43,18 @@ namespace TicTacToe.Models.StateMachines
             this.GameStatus = GameStatus.Ready;
             this.GameOutcome = GameOutcome.Undecided;
         }
+
+        /// <summary>
+        /// Gets the player who plays X in the game.
+        /// </summary>
+        /// <value>Player (computer or human) who goes first and plays X.</value>
+        public Player XPlayer { get; init; }
+
+        /// <summary>
+        /// Gets the player who plays O in the game.
+        /// </summary>
+        /// <value>Player (computer or human) who goes next and plays O.</value>
+        public Player OPlayer { get; init; }
 
         /// <summary>
         /// Gets the current status of the game.
@@ -120,17 +122,19 @@ namespace TicTacToe.Models.StateMachines
                 ++this._turnNumber;
                 try
                 {
+                    this._renderGameBoard(this);
+
                     var move = this.IsXTurn
-                        ? this._xPlayer.GetMove(this._oPlayer)
-                        : this._oPlayer.GetMove(this._xPlayer);
+                        ? this.XPlayer.GetMove(this.OPlayer)
+                        : this.OPlayer.GetMove(this.XPlayer);
                     this.Moves.Add(move);
 
-                    if (this._xPlayer.HasWon)
+                    if (this.XPlayer.HasWon)
                     {
                         this.GameStatus = GameStatus.Completed;
                         this.GameOutcome = GameOutcome.XWon;
                     }
-                    else if (this._oPlayer.HasWon)
+                    else if (this.OPlayer.HasWon)
                     {
                         this.GameStatus = GameStatus.Completed;
                         this.GameOutcome = GameOutcome.OWon;
@@ -147,8 +151,9 @@ namespace TicTacToe.Models.StateMachines
                     this.GameStatus = GameStatus.Unfinished;
                     this.GameOutcome = GameOutcome.Quit;
                 }
-                this._renderGameBoard(this._xPlayer.State, this._oPlayer.State);
             }
+
+            this._renderGameBoard(this);
         }
 
         /// <summary>
@@ -163,17 +168,19 @@ namespace TicTacToe.Models.StateMachines
                 throw new InvalidOperationException("Cannot export summary of a game that has not completed");
             }
 
-            return new GameSummary(
-                    Guid.NewGuid(),
-                    this._gameNumber,
-                    this._xPlayer.Name,
-                    this._oPlayer.Name,
-                    this._isXHuman,
-                    this._isOHuman,
-                    DateTime.Now,
-                    this.Moves.ToArray(),
-                    this.GameOutcome,
-                    this.GameMode);
+            return new GameSummary
+            {
+                Id = Guid.NewGuid(),
+                GameNo = this._gameNumber,
+                XPlayer = this.XPlayer.Name,
+                OPlayer = this.OPlayer.Name,
+                IsXHuman = Player.IsHuman(this.XPlayer),
+                IsOHuman = Player.IsHuman(this.OPlayer),
+                DateAndTime = DateTime.Now,
+                Moves = this.Moves.ToArray(),
+                GameOutcome = this.GameOutcome,
+                GameMode = this.GameMode,
+            };
         }
     }
 }

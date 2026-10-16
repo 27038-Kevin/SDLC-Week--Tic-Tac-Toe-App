@@ -4,27 +4,28 @@ using TicTacToe.Models.Data;
 using TicTacToe.Models.StateMachines;
 using TicTacToe.Models.Utils;
 using TicTacToe.Persistence.Repositories;
+using TicTacToe.View.GameRenderers;
 
 namespace TicTacToe.Services
 {
+    /// <summary>
+    /// Oversees repository operations on <see cref="GameSummary"/> objects,
+    /// as well as game-related services such as playing, rewatching, etc.
+    /// </summary>
     internal class GameService
     {
         private readonly GameRepository _repository;
-
-        private readonly Action<int, int> _boardRenderer;
-        private readonly Func<int> _inputGetter;
+        private readonly IGameDisplay _gameDisplay;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GameService"/> class.
         /// </summary>
         /// <param name="repository">The repository that aggregates <see cref="GameSummary"/> instances.</param>
-        /// <param name="renderBoard">Renders the board on the console.</param>
-        /// <param name="getGameInput">Gets input from the user for their move.</param>
-        public GameService(GameRepository repository, Action<int, int> renderBoard, Func<int> getGameInput)
+        /// <param name="gameDisplayViewModel">The view model used to render the game live.</param>
+        public GameService(GameRepository repository, IGameDisplay gameDisplayViewModel)
         {
             this._repository = repository;
-            this._boardRenderer = renderBoard;
-            this._inputGetter = getGameInput;
+            this._gameDisplay = gameDisplayViewModel;
         }
 
         /// <summary>
@@ -126,15 +127,15 @@ namespace TicTacToe.Services
 
             if (mode == GameMode.Manual)
             {
-                xPlayer = new HumanPlayer('X', player1Name ?? "Player", this._inputGetter);
-                oPlayer = new HumanPlayer('O', player2Name ?? "Player", this._inputGetter);
+                xPlayer = new HumanPlayer('X', player1Name ?? "Player", this._gameDisplay.GetMoveInput);
+                oPlayer = new HumanPlayer('O', player2Name ?? "Player", this._gameDisplay.GetMoveInput);
             }
             else
             {
                 char humanLetter = humanGoesFirst ? 'X' : 'O';
                 char botLetter = humanGoesFirst ? 'O' : 'X';
 
-                Player human = new HumanPlayer(humanLetter, player1Name ?? "Player", this._inputGetter);
+                Player human = new HumanPlayer(humanLetter, player1Name ?? "Player", this._gameDisplay.GetMoveInput);
                 Player bot = mode switch
                 {
                     GameMode.Easy => new EasyBotPlayer(botLetter),
@@ -148,11 +149,14 @@ namespace TicTacToe.Services
             }
 
             uint gameNo = (uint)this._repository.GetAll().Count() + 1;
-            var game = new Game(gameNo, xPlayer, oPlayer, mode, this._boardRenderer);
+            var game = new Game(gameNo, xPlayer, oPlayer, mode, this._gameDisplay.RenderGameBoard);
             game.Start();   // Wait for game to end
 
-            GameSummary gameSummary = game.ExportSummary();
-            this._repository.Save(gameSummary);
+            // Do not save games that were not started in the first place
+            if (game.Moves.Any())
+            {
+                this._repository.Save(game.ExportSummary());
+            }
         }
     }
 }

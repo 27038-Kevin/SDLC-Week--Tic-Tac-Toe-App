@@ -15,16 +15,17 @@ namespace TicTacToe.Models.Data
     /// <param name="Moves">The moves played in the game in sequence.</param>
     /// <param name="GameOutcome">The final outcome of the game.</param>
     /// <param name="GameMode">The game mode.</param>
-    internal record GameSummary(
-                    Guid Id,
-                    uint GameNo,
-                    string XPlayer,
-                    string OPlayer,
-                    bool IsXHuman,
-                    bool IsOHuman,
-                    DateTime DateAndTime,
-                    int[] Moves,
-                    GameOutcome GameOutcome,
-                    GameMode GameMode)
-            : IHasId;
+    internal record GameSummary() : IHasId, IEquatable<GameSummary>
+    {
+        public Guid Id { get; init; }
+        public uint GameNo { get; init; }
+        public string XPlayer { get; init; }
+        public string OPlayer { get; init; }
+        public bool IsXHuman { get; init; }
+        public bool IsOHuman { get; init; }
+        public DateTime DateAndTime { get; init; }
+        public int[] Moves { get; init; }
+        public GameOutcome GameOutcome { get; init; }
+        public GameMode GameMode { get; init; }
+    }
 }

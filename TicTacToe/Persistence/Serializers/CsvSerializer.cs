@@ -30,7 +30,7 @@ namespace TicTacToe.Persistence.Serializers
             {
                 string stringValue => this.EscapeString(stringValue),
                 decimal decimalValue => decimalValue.ToString(Constants.ProjectCulture),
-                DateTime dateValue => dateValue.ToString(Constants.DateTimeFormat),
+                DateTime dateValue => dateValue.ToString(Constants.DateTimeFormat, Constants.ProjectCulture),
                 IEnumerable<int> intCollection => this.EscapeString(string.Join(',', intCollection)),
                 object value => this.EscapeString(value.ToString() ?? string.Empty),
                 null => throw new SerializationException("One or more required properties are null"),
@@ -61,6 +61,8 @@ namespace TicTacToe.Persistence.Serializers
                 string part = parts[i];
                 object value = property.PropertyType switch
                 {
+                    Type tBool when tBool == typeof(bool) => bool.Parse(part),
+
                     Type tDate when tDate == typeof(DateTime) =>
                         DateTime.ParseExact(
                             part,

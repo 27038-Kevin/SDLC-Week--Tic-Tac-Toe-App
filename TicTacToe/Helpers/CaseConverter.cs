@@ -56,5 +56,25 @@ namespace TicTacToe.Helpers
 
             return titleCasedName.ToString();
         }
+
+        /// <summary>
+        /// Converts a Title Cased string to a PascalCased string.
+        /// </summary>
+        /// <param name="titleCasedName">The Title Cased string.</param>
+        /// <returns>PascalCased string.</returns>
+        public static string TitleToPascal(string titleCasedName)
+        {
+            var pascalCasedName = new StringBuilder();
+
+            for (int i = 0; i < titleCasedName.Length; ++i)
+            {
+                if (titleCasedName[i] != ' ')
+                {
+                    pascalCasedName.Append(titleCasedName[i]);
+                }
+            }
+
+            return pascalCasedName.ToString();
+        }
     }
 }

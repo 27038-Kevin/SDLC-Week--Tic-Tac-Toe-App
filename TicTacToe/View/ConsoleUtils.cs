@@ -29,5 +29,19 @@
         {
             return Console.ReadKey(intercept: true);
         }
+
+        /// <summary>
+        /// Gets a line of input from the user.
+        /// </summary>
+        /// <param name="prompt">The user prompt.</param>
+        /// <returns>The line inputted by the user.</returns>
+        public static string GetLine(string prompt)
+        {
+            Console.CursorVisible = true;
+            Console.WriteLine(prompt);
+            string input = Console.ReadLine()?.Trim() ?? string.Empty;
+            Console.CursorVisible = false;
+            return input;
+        }
     }
 }

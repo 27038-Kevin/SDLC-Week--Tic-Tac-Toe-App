@@ -28,23 +28,25 @@
         /// <exception cref="InvalidOperationException">Thrown if the method is invoked after the game has ended.</exception>
         public override int GetMove(Player opponent)
         {
-            if (opponent.Letter == Letter)
+            if (opponent.Letter == this.Letter)
             {
                 throw new ArgumentException("Both players cannot play the same letter", nameof(opponent));
             }
 
-            if ((State & opponent.State) != 0)
+            if ((this.State & opponent.State) != 0)
             {
                 throw new ArgumentException("Opponent's state is inconsistent with current player's state", nameof(opponent));
             }
 
-            if (HasWon || opponent.HasWon || (State | opponent.State) == FullBoardMask)
+            if (this.HasWon || opponent.HasWon || (this.State | opponent.State) == FullBoardMask)
             {
                 throw new InvalidOperationException("Cannot get a move after the game has ended");
             }
 
-            int xState = Letter == 'X' ? State : opponent.State;
-            int oState = Letter == 'O' ? State : opponent.State;
+            int xState = this.Letter == 'X' ? this.State : opponent.State;
+            int oState = this.Letter == 'O' ? this.State : opponent.State;
+
+            this.SimulateWait();
 
             /**
              * Summary:
@@ -56,8 +58,8 @@
              * - If there are multiple optimal plays in a given position, the bot chooses any random play.
              * - This adds temperature to make the game interesting and dynamic, rather than following a pre-determined state flow.
              */
-            int moveChoice = LookupSearchMap((xState, oState));
-            MarkSpot(moveChoice);
+            int moveChoice = this.LookupSearchMap((xState, oState));
+            this.MarkSpot(moveChoice);
             return moveChoice;
         }
     }

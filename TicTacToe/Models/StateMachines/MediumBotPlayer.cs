@@ -69,6 +69,8 @@
             int oState = Letter == 'O' ? State : opponent.State;
             var boardState = (xState, oState);
 
+            this.SimulateWait();
+
             if (_markedSpots == 0)
             {
                 int moveChoice = LookupSearchMap(boardState);

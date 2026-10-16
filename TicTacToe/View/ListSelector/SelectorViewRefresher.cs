@@ -1,33 +1,38 @@
 ﻿using TicTacToe.Enums;
-using TicTacToe.Models.Utils;
 
-namespace TicTacToe.View.GridSelector
+namespace TicTacToe.View.ListSelector
 {
     /// <summary>
     /// Refreshes the view with every update in state for the selector UI element.
     /// </summary>
     internal class SelectorViewRefresher : IDisposable
     {
-        private readonly bool _isCancellable;
+        /// <summary>
+        /// Stores the currently selected choice index used when rendering.
+        /// </summary>
+        private int _selected = 0;
 
-        private CartesianStateTracker _selected;
+        /// <summary>
+        /// Stores whether the menu can be cancelled with the Esc key.
+        /// </summary>
+        private bool _isCancellable;
 
         private bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SelectorViewRefresher"/> class.
         /// </summary>
-        /// <param name="options">The matrix of options to be rendered in the selector view.</param>
+        /// <param name="choices">The list of choices to be rendered in the selector view.</param>
         /// <param name="renderView">Method to render the selector view.</param>
         /// <param name="clearView">Method to clear the selector view.</param>
         /// <param name="isCancellable">Whether or not the selector menu can be returned from.</param>
         internal SelectorViewRefresher(
-                string[,] options,
-                Action<string[,], CartesianStateTracker> renderView,
+                IList<string> choices,
+                Action<IList<string>, int> renderView,
                 Action clearView,
                 bool isCancellable)
         {
-            this.Options = options;
+            this.Choices = choices;
             this.RenderView = renderView;
             this.ClearView = clearView;
             this._isCancellable = isCancellable;
@@ -36,24 +41,28 @@ namespace TicTacToe.View.GridSelector
         /// <summary>
         /// Gets a single-cast action to render the view.
         /// </summary>
-        /// <value>Method responsible for rendering the grid selector view.</value>
-        public Action<string[,], CartesianStateTracker> RenderView { get; private set; }
+        /// <value>Delegate which renders the view when invoked.</value>
+        public Action<IList<string>, int> RenderView { get; private set; }
 
         /// <summary>
         /// Gets a single-cast action to clear the view.
         /// </summary>
-        /// <value>Method responsible for clearing or flushing the view render.</value>
+        /// <value>Delegate which clears the screen when invoked.</value>
         public Action ClearView { get; private set; }
 
         /// <summary>
         /// Gets the currently available choices.
         /// </summary>
-        /// <value>A matrix representing the grid.</value>
-        public string[,] Options { get; private set; }
+        /// <value>The choices currently present in the selector view.</value>
+        public IList<string> Choices { get; private set; }
 
         /// <summary>
-        /// Disposes of the <see cref="SelectorViewRefresher"/> instance appropriately.
+        /// Releases all resources used by the object.
         /// </summary>
+        /// <remarks>
+        /// Call Dispose when you are finished using the object to free unmanaged resources.
+        /// After calling Dispose, do not use the object again.
+        /// </remarks>
         public void Dispose()
         {
             this.Dispose(true);
@@ -63,37 +72,29 @@ namespace TicTacToe.View.GridSelector
         /// <summary>
         /// Refreshes the total state, including the state of attached external components.
         /// </summary>
-        /// <param name="options">
-        /// The available options to be rendered as a matrix on the search view.
-        /// (Subject to change during dynamic refresh.)
-        /// </param>
+        /// <param name="choices">The available choices to be rendered on the search view. (Subject to change during dynamic live search.)</param>
         /// <param name="lastKeyPress">The last key press made by the user.</param>
         /// <param name="stateTracker">Tracker that holds selection index and choice count.</param>
         /// <returns>The current selector view state.</returns>
         internal SelectorViewState RefreshState(
-                string[,] options,
-                ConsoleKeyInfo lastKeyPress,
+                IList<string> choices,
+                ConsoleKeyInfo? lastKeyPress,
                 SelectorStateTracker stateTracker)
         {
             // Update the available choices and number of choices
-            this.Options = options;
-            stateTracker.RowCount = options.GetLength(0);
-            stateTracker.ColumnCount = options.GetLength(1);
+            this.Choices = choices ?? Array.Empty<string>();
+            stateTracker.ChoicesCount = choices?.Count ?? 0;
 
             // Wire the tracker's selected state to the refresher
             this._selected = stateTracker.Selected;
 
-            return lastKeyPress.Key switch
+            return lastKeyPress?.Key switch
             {
                 ConsoleKey.UpArrow => stateTracker.KeyUp(this),
 
                 ConsoleKey.DownArrow => stateTracker.KeyDown(this),
 
-                ConsoleKey.LeftArrow => stateTracker.KeyLeft(this),
-
-                ConsoleKey.RightArrow => stateTracker.KeyRight(this),
-
-                ConsoleKey.Enter => this.Options.Length != 0
+                ConsoleKey.Enter => (stateTracker.ChoicesCount != 0)
                                         ? stateTracker.Select(this)
                                         : this.RefreshView(),   // Do not select if the choice list is empty
 
@@ -112,7 +113,7 @@ namespace TicTacToe.View.GridSelector
         internal SelectorViewState RefreshView()
         {
             this.ClearView?.Invoke();
-            this.RenderView?.Invoke(this.Options, this._selected);
+            this.RenderView?.Invoke(this.Choices, this._selected);
             return SelectorViewState.Active;
         }
 
@@ -140,16 +141,16 @@ namespace TicTacToe.View.GridSelector
         /// Update the selected index used during render.
         /// </summary>
         /// <param name="selected">The currently selected index.</param>
-        internal void UpdateSelected(CartesianStateTracker selected)
+        internal void UpdateSelected(int selected)
         {
             this._selected = selected;
         }
 
         /// <summary>
-        /// Disposes of managed resources.
-        /// Resets delegates to allow garbage collection.
+        /// Disposes of managed memory resources;
+        /// more specifically, resets the two singlecast delegates used for view refresh.
         /// </summary>
-        /// <param name="disposing">Whether or not managed resources are currently being disposed.</param>
+        /// <param name="disposing">true if the delegates are currently being disposed; false otherwise.</param>
         private void Dispose(bool disposing)
         {
             if (this._disposed)
@@ -159,8 +160,8 @@ namespace TicTacToe.View.GridSelector
 
             if (disposing)
             {
-                this.ClearView = default!;
                 this.RenderView = default!;
+                this.ClearView = default!;
             }
 
             this._disposed = true;

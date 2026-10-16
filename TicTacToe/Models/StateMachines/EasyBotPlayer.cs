@@ -43,6 +43,8 @@
                 throw new InvalidOperationException("Cannot get a move after the game has ended");
             }
 
+            this.SimulateWait();
+
             /**
              * Summary:
              * The easy-level bot player should select randomly as long as its move does not prevent the opponent from winning in their next move.
@@ -63,6 +65,7 @@
             int winningSquare = GetWinningSquare(this.State, opponent.State);
             if (winningSquare != -1)
             {
+                this.MarkSpot(winningSquare);
                 return winningSquare;
             }
 

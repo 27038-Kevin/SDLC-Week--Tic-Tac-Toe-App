@@ -76,6 +76,17 @@
         }
 
         /// <summary>
+        /// Simulates waiting time for a bot.
+        /// </summary>
+        protected void SimulateWait()
+        {
+            int maximumWaitTime = 2500; // ms
+            float randomCoefficient = this._random.NextSingle();
+            float waitTime = randomCoefficient * maximumWaitTime;
+            Thread.Sleep((int)waitTime);
+        }
+
+        /// <summary>
         /// Looks up the pre-computed search map for the most optimal plays in a position.
         /// </summary>
         /// <param name="boardState">The total state of the board, consisting of both the X-player's state and the O-player's state.</param>
