@@ -27,12 +27,12 @@ namespace TicTacToe.View
         /// <param name="menuHeader">The menu's header.</param>
         /// <param name="menuFooter">The menu's footer.</param>
         /// <param name="selectedChoice">The choice selected by the user, if any.</param>
-        public void RenderWithStatelessCancellation(string menuHeader, string menuFooter, out TMenu? selectedChoice)
+        public void RunWithStatelessCancellation(string menuHeader, string menuFooter, out TMenu? selectedChoice)
         {
             selectedChoice = default;
             try
             {
-                selectedChoice = this.Render(menuHeader, menuFooter, true);
+                selectedChoice = this.Run(menuHeader, menuFooter, true);
             }
             catch (MenuCancelledException)
             {
@@ -46,10 +46,10 @@ namespace TicTacToe.View
         /// <param name="menuHeader">The text to be displayed above the menu.</param>
         /// <param name="menuFooter">The text to be displayed below the menu.</param>
         /// <param name="isMenuCancellable">Whether or not the user can cancel the menu.</param>
-        /// <returns>Returns the user's selection from the menu.</returns>
+        /// <returns>Returns the user's selections from the menu.</returns>
         /// <exception cref="MenuCancelledException">Thrown when the user cancels the menu (given the menu is cancellable).</exception>
         /// <exception cref="ApplicationException">Thrown due to unforeseen system crashes or corruption in the internal state.</exception>
-        public TMenu Render(string menuHeader, string menuFooter, bool isMenuCancellable)
+        public TMenu Run(string menuHeader, string menuFooter, bool isMenuCancellable)
         {
             this.Header = menuHeader;
             this.Footer = menuFooter;
@@ -66,18 +66,65 @@ namespace TicTacToe.View
                 selector.Update(this.MenuLines, keyPress);
             }
 
-            return selector.ViewState switch
+            if (selector.ViewState == SelectorViewState.Selected)
             {
-                SelectorViewState.Selected => Enum.Parse<TMenu>(
-                                                CaseConverter.TitleToPascal(
-                                                    this.MenuLines[selector.Selection])),
+                return Enum.Parse<TMenu>(
+                        CaseConverter.TitleToPascal(
+                            this.MenuLines[selector.Selection]));
+            }
 
-                SelectorViewState.Cancelled => throw new MenuCancelledException(),
+            if (selector.ViewState == SelectorViewState.Cancelled)
+            {
+                throw new MenuCancelledException();
+            }
 
-                _ => throw new ApplicationException("Unexpected state corruption"), // Can only be triggered during debug mode
-            };
+            // Application should never be able to reach this line
+            throw new ApplicationException("Corrupted state flow");
         }
 
+        /// <summary>
+        /// Renders the menu on-screen and returns the selected choices.
+        /// Used for when the menu needs to persist, rather than returning a single selection.
+        /// </summary>
+        /// <param name="menuHeader">The text to be displayed above the menu.</param>
+        /// <param name="menuFooter">The text to be displayed below the menu.</param>
+        /// <param name="isMenuCancellable">Whether or not the user can cancel the menu.</param>
+        /// <returns>Returns the user's selections from the menu.</returns>
+        public IEnumerable<TMenu> RunPersistently(string menuHeader, string menuFooter, bool isMenuCancellable)
+        {
+            this.Header = menuHeader;
+            this.Footer = menuFooter;
+
+            using var selector = new Selector(
+                    this.MenuLines,
+                    this.RenderMenu,
+                    ConsoleUtils.ClearScreen,
+                    isMenuCancellable);
+
+            while (selector.ViewState != SelectorViewState.Cancelled)
+            {
+                while (selector.ViewState == SelectorViewState.Active)
+                {
+                    ConsoleKeyInfo keyPress = ConsoleUtils.GetKeyPress();
+                    selector.Update(this.MenuLines, keyPress);
+                }
+
+                if (selector.ViewState == SelectorViewState.Selected)
+                {
+                    yield return Enum.Parse<TMenu>(
+                            CaseConverter.TitleToPascal(
+                                this.MenuLines[selector.Selection]));
+
+                    selector.Reset();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Display method for rendering the menu on-screen.
+        /// </summary>
+        /// <param name="menu">The menu to be rendered.</param>
+        /// <param name="selectedOption">The currently selected menu option index.</param>
         private void RenderMenu(IList<string> menu, int selectedOption)
         {
             Console.WriteLine(this.Header);

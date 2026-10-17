@@ -59,6 +59,15 @@ namespace TicTacToe.View.ListSelector
         }
 
         /// <summary>
+        /// Resets the selector so that the same selector instance can be reused.
+        /// </summary>
+        public void Reset()
+        {
+            this._stateTracker.Reset();
+            this._viewRefresher.Reset();
+        }
+
+        /// <summary>
         /// Releases all resources used by the object.
         /// </summary>
         /// <remarks>

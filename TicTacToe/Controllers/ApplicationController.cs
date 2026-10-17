@@ -29,9 +29,8 @@ namespace TicTacToe.Controllers
             string header = $"{Constants.Greeting}, {Constants.TempName}!{Environment.NewLine}{Environment.NewLine}MAIN MENU";
             string footer = Menu.GetBasicMenuFooter();
 
-            while (true)
+            foreach (MainMenuOption selection in mainMenu.RunPersistently(header, footer, false))
             {
-                MainMenuOption selection = mainMenu.Render(header, footer, false);
                 switch (selection)
                 {
                     case MainMenuOption.QuickMatch:
@@ -39,7 +38,8 @@ namespace TicTacToe.Controllers
                         break;
 
                     case MainMenuOption.ViewGameHistory:
-                        throw new NotImplementedException();
+                        this._gameController.ViewGameHistory();
+                        break;
 
                     case MainMenuOption.UserOptions:
                         throw new NotImplementedException();

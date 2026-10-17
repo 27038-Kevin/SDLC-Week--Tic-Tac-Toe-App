@@ -1,23 +1,34 @@
 ﻿using System.ComponentModel;
 using TicTacToe.Enums;
 using TicTacToe.Exceptions;
+using TicTacToe.Models.Utils;
 using TicTacToe.Services;
 using TicTacToe.View;
+using TicTacToe.View.GameRenderers;
 
 namespace TicTacToe.Controllers
 {
     internal class GameController
     {
         private readonly GameService _service;
+        private readonly IGameDisplay _gameRenderer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GameController"/> class.
         /// </summary>
         /// <param name="service">The service that runs games and manages game history.</param>
-        public GameController(GameService service)
+        /// <param name="gameDisplay">The element that renders the game components on the screen.</param>
+        public GameController(GameService service, IGameDisplay gameDisplay)
         {
             this._service = service;
+            this._gameRenderer = gameDisplay;
         }
+
+        /// <summary>
+        /// Gets or sets the summary filter to be used.
+        /// </summary>
+        /// <value>The filter applied to all the game summaries present in the repository.</value>
+        private GameSummaryFilter Filter { get; set; } = GameSummaryFilter.Empty;
 
         /// <summary>
         /// Starts a new game of tic-tac-toe.
@@ -33,7 +44,7 @@ namespace TicTacToe.Controllers
 
             while (true)
             {
-                gameModeMenu.RenderWithStatelessCancellation(gameModeMenuHeader, menuFooter, out GameMode? gameModeSelection);
+                gameModeMenu.RunWithStatelessCancellation(gameModeMenuHeader, menuFooter, out GameMode? gameModeSelection);
                 if (gameModeSelection is null)
                 {
                     break;  // Control exits loop and returns to main menu
@@ -54,7 +65,7 @@ namespace TicTacToe.Controllers
                     case GameMode.Medium:
                     case GameMode.Impossible:
                         player1Name = Constants.TempName;
-                        letterMenu.RenderWithStatelessCancellation(letterMenuHeader, menuFooter, out Letter? letterSelection);
+                        letterMenu.RunWithStatelessCancellation(letterMenuHeader, menuFooter, out Letter? letterSelection);
                         if (letterSelection is null)
                         {
                             continue;   // Goes back to game mode menu
@@ -66,6 +77,80 @@ namespace TicTacToe.Controllers
                 this._service.StartNewGame(gameModeSelection.Value, playerGoesFirst, player1Name, player2Name);
                 break;  // Break loop after game ends
             }
+        }
+
+        /// <summary>
+        /// Allows the user
+        /// - to view game history
+        /// - apply filters to the game history
+        /// - see stats
+        /// - rewatch old games
+        /// etc.
+        /// </summary>
+        internal void ViewGameHistory()
+        {
+            var summaries = this._service.GetGames(this.Filter);
+            // TODO: Rewrite GameHistoryRenderer so that it dynamically refreshes summaries
+            var gameHistory = new GameHistoryRenderer(summaries, this._gameRenderer.ReplayGame);
+            gameHistory.Render(this.SetFilter);
+        }
+
+        /// <summary>
+        /// Sets the filter to use on the game summaries.
+        /// Activates when the user presses F on the <see cref="View.ListSelector.Selector"/> this handler is subscribed to.
+        /// </summary>
+        /// <param name="sender">The sender of the event. Required parameter.</param>
+        /// <param name="keyPress">The user's keypress.</param>
+        private void SetFilter(object? sender, ConsoleKeyInfo? keyPress)
+        {
+            if (keyPress is null || keyPress.Value.Key != ConsoleKey.F)
+            {
+                return;
+            }
+
+            var filterMenu = new Menu<FilterOption>();
+            var getFilter = new FilterGetters();
+
+            const string filterMenuHeader = "Filter Options";
+            string filterMenuFooter = @"
+Select a filter to either set or reset it, if it is already set.
+" + Menu.GetBasicMenuFooter(isMenuCancellable: true);
+
+            DateTimeRange? dateRangeFilter = this.Filter.DateRange;
+            GameMode? gameModeFilter = this.Filter.Mode;
+            PlayerOrientedGameOutcome? gameOutcomeFilter = this.Filter.Outcome;
+            Letter? letterFilter = this.Filter.LetterPlayed;
+
+            foreach (FilterOption selection in filterMenu.RunPersistently(
+                                                filterMenuHeader,
+                                                filterMenuFooter,
+                                                isMenuCancellable: true))
+            {
+                switch (selection)
+                {
+                    case FilterOption.DateRange:
+                        getFilter.GetDateRangeFilter(ref dateRangeFilter);
+                        break;
+
+                    case FilterOption.GameMode:
+                        getFilter.GetGameModeFilter(ref gameModeFilter);
+                        break;
+
+                    case FilterOption.GameOutcome:
+                        getFilter.GetPlayerOrientedGameOutcomeFilter(ref gameOutcomeFilter);
+                        break;
+
+                    case FilterOption.LetterPlayed:
+                        getFilter.GetLetterFilter(ref letterFilter);
+                        break;
+                }
+            }
+
+            this.Filter = new GameSummaryFilter(
+                                dateRangeFilter,
+                                gameModeFilter,
+                                gameOutcomeFilter,
+                                letterFilter);
         }
     }
 }

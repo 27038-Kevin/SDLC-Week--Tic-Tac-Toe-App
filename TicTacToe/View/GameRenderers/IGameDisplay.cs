@@ -1,4 +1,5 @@
-﻿using TicTacToe.Models.StateMachines;
+﻿using TicTacToe.Models.Data;
+using TicTacToe.Models.StateMachines;
 
 namespace TicTacToe.View.GameRenderers
 {
@@ -18,5 +19,11 @@ namespace TicTacToe.View.GameRenderers
         /// </summary>
         /// <returns>The inputted move.</returns>
         int GetMoveInput();
+
+        /// <summary>
+        /// Replays an old game in real time.
+        /// </summary>
+        /// <param name="gameSummary">The game information used for re-rendering the game.</param>
+        void ReplayGame(GameSummary gameSummary);
     }
 }

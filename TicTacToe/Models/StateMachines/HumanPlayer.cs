@@ -1,4 +1,6 @@
-﻿namespace TicTacToe.Models.StateMachines
+﻿using TicTacToe.Enums;
+
+namespace TicTacToe.Models.StateMachines
 {
     /// <summary>
     /// A human that plays tic-tac-toe.
@@ -19,12 +21,12 @@
         /// <param name="name">The name of the human player.</param>
         /// <param name="getGameInput">The method invoked to get input from the player.</param>
         public HumanPlayer(
-                char letter,
+                Letter letter,
                 string name,
                 Func<int> getGameInput)
             : base(letter, name)
         {
-            _getGameInput = getGameInput;
+            this._getGameInput = getGameInput;
         }
 
         /// <summary>
@@ -43,33 +45,33 @@
         /// </exception>
         public override int GetMove(Player opponent)
         {
-            if (opponent.Letter == Letter)
+            if (opponent.Letter == this.Letter)
             {
                 throw new ArgumentException("Both players cannot play the same letter", nameof(opponent));
             }
 
-            if ((State & opponent.State) != 0)
+            if ((this.State & opponent.State) != 0)
             {
                 throw new ArgumentException("Opponent's state is inconsistent with current player's state", nameof(opponent));
             }
 
-            if (HasWon || opponent.HasWon || (State | opponent.State) == FullBoardMask)
+            if (this.HasWon || opponent.HasWon || (this.State | opponent.State) == FullBoardMask)
             {
                 throw new InvalidOperationException("Cannot get a move after the game has ended");
             }
 
-            int xState = Letter == 'X' ? State : opponent.State;
-            int oState = Letter == 'O' ? State : opponent.State;
+            int xState = this.Letter == Letter.X ? this.State : opponent.State;
+            int oState = this.Letter == Letter.O ? this.State : opponent.State;
 
             while (true)
             {
-                int moveChoice = _getGameInput();  // Throws QuitGameException
-                if (!Squares.Contains(moveChoice) || IsMarked(moveChoice, opponent.State))
+                int moveChoice = this._getGameInput();  // Throws QuitGameException
+                if (!Squares.Contains(moveChoice) || this.IsMarked(moveChoice, opponent.State))
                 {
                     continue;   // Continue silently until user chooses a valid input
                 }
 
-                MarkSpot(moveChoice);
+                this.MarkSpot(moveChoice);
                 return moveChoice;
             }
         }

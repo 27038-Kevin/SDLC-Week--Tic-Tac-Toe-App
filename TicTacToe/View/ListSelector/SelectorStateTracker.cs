@@ -120,10 +120,18 @@ namespace TicTacToe.View.ListSelector
         }
 
         /// <summary>
+        /// Resets the internal state of the selector.
+        /// </summary>
+        internal void Reset()
+        {
+            this.Selected = 0;
+        }
+
+        /// <summary>
         /// Removes all dynamic plugins subscribed to the Update event, freeing up resources to avoid memory leaks.
         /// </summary>
         /// <param name="disposing">true if currently resetting Update event; false otherwise.</param>
-        internal void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (this._disposed)
             {

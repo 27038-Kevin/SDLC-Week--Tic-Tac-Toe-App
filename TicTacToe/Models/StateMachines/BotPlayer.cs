@@ -1,4 +1,6 @@
-﻿namespace TicTacToe.Models.StateMachines
+﻿using TicTacToe.Enums;
+
+namespace TicTacToe.Models.StateMachines
 {
     /// <summary>
     /// Represents a tic-tac-toe bot player, which is the abstract class serving as the base for all tic-tac-toe bot implementations.
@@ -40,7 +42,7 @@
         /// </summary>
         /// <param name="letter">The letter assigned to the player.</param>
         /// <param name="name">The name designated to the bot.</param>
-        public BotPlayer(char letter, string name)
+        public BotPlayer(Letter letter, string name)
             : base(letter, name)
         {
         }

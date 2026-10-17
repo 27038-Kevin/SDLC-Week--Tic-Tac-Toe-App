@@ -43,5 +43,14 @@
             Console.CursorVisible = false;
             return input;
         }
+
+        /// <summary>
+        /// Prompts the user to press any key to continue.
+        /// </summary>
+        public static void PromptContinuation()
+        {
+            Console.WriteLine("Press any key to continue...");
+            GetKeyPress();
+        }
     }
 }

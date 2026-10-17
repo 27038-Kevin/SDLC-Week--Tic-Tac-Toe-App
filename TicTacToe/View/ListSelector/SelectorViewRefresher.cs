@@ -147,6 +147,14 @@ namespace TicTacToe.View.ListSelector
         }
 
         /// <summary>
+        /// Resets the currently selected index.
+        /// </summary>
+        internal void Reset()
+        {
+            this._selected = 0;
+        }
+
+        /// <summary>
         /// Disposes of managed memory resources;
         /// more specifically, resets the two singlecast delegates used for view refresh.
         /// </summary>

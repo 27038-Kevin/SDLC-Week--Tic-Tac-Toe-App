@@ -1,4 +1,6 @@
-﻿namespace TicTacToe.Models.StateMachines
+﻿using TicTacToe.Enums;
+
+namespace TicTacToe.Models.StateMachines
 {
     /// <summary>
     /// A tic-tac-toe bot that plays at the easy level -- it does not prevent the user from winning the game and moves without any direction or motive.
@@ -11,7 +13,7 @@
         /// Initializes a new instance of the <see cref="EasyBotPlayer"/> class.
         /// </summary>
         /// <param name="letter">The letter assigned to the player (X/O).</param>
-        public EasyBotPlayer(char letter)
+        public EasyBotPlayer(Letter letter)
             : base(letter, BotName)
         {
         }

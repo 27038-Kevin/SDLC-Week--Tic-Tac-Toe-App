@@ -1,4 +1,6 @@
-﻿namespace TicTacToe.Models.StateMachines
+﻿using TicTacToe.Enums;
+
+namespace TicTacToe.Models.StateMachines
 {
     /// <summary>
     /// A tic-tac-toe bot that plays at the medium level -- it does not easily lose to the user, and attempts to put up a fight most of the time.
@@ -11,7 +13,7 @@
         /// Initializes a new instance of the <see cref="MediumBotPlayer"/> class.
         /// </summary>
         /// <param name="letter">The letter assigned to the player (X/O).</param>
-        public MediumBotPlayer(char letter)
+        public MediumBotPlayer(Letter letter)
             : base(letter, BotName)
         {
         }
@@ -28,17 +30,17 @@
         /// <exception cref="InvalidOperationException">Thrown if the method is invoked after the game has ended.</exception>
         public override int GetMove(Player opponent)
         {
-            if (opponent.Letter == Letter)
+            if (opponent.Letter == this.Letter)
             {
                 throw new ArgumentException("Both players cannot play the same letter", nameof(opponent));
             }
 
-            if ((State & opponent.State) != 0)
+            if ((this.State & opponent.State) != 0)
             {
                 throw new ArgumentException("Opponent's state is inconsistent with current player's state", nameof(opponent));
             }
 
-            if (HasWon || opponent.HasWon || (State | opponent.State) == FullBoardMask)
+            if (this.HasWon || opponent.HasWon || (this.State | opponent.State) == FullBoardMask)
             {
                 throw new InvalidOperationException("Cannot get a move after the game has ended");
             }
@@ -65,53 +67,53 @@
              * - There is only a 50% probability that it will opt for the random heuristic strategy after the first two moves.
              * - This balances out the shortcomings of the random heuristic approach by drastically reducing its frequency.
              */
-            int xState = Letter == 'X' ? State : opponent.State;
-            int oState = Letter == 'O' ? State : opponent.State;
+            int xState = this.Letter == Letter.X ? this.State : opponent.State;
+            int oState = this.Letter == Letter.O ? this.State : opponent.State;
             var boardState = (xState, oState);
 
             this.SimulateWait();
 
-            if (_markedSpots == 0)
+            if (this._markedSpots == 0)
             {
-                int moveChoice = LookupSearchMap(boardState);
-                MarkSpot(moveChoice);
+                int moveChoice = this.LookupSearchMap(boardState);
+                this.MarkSpot(moveChoice);
                 return moveChoice;
             }
 
             // Get a random condition to choose a strategy
-            bool randomStrategy = _random.Next() % 2 == 0;
+            bool randomStrategy = this._random.Next() % 2 == 0;
             if (randomStrategy)
             {
                 // If winning is possible, then mark the winning square
-                int winningSquare = GetWinningSquare(State, opponent.State);
+                int winningSquare = GetWinningSquare(this.State, opponent.State);
                 if (winningSquare != -1)
                 {
-                    MarkSpot(winningSquare);
+                    this.MarkSpot(winningSquare);
                     return winningSquare;
                 }
 
                 // If the opponent can win, block the win
-                int opponentWinningSquare = GetWinningSquare(opponent.State, State);
+                int opponentWinningSquare = GetWinningSquare(opponent.State, this.State);
                 if (opponentWinningSquare != -1)
                 {
-                    MarkSpot(opponentWinningSquare);
+                    this.MarkSpot(opponentWinningSquare);
                     return opponentWinningSquare;
                 }
 
                 // If neither winning nor prophlyaxis are feasible, then fallback to randomization
-                int[] candidateMoves = Squares.Where(square => !IsMarked(square, opponent.State))
+                int[] candidateMoves = Squares.Where(square => !this.IsMarked(square, opponent.State))
                                             .ToArray();
 
-                int randomIndex = _random.Next(candidateMoves.Length);
+                int randomIndex = this._random.Next(candidateMoves.Length);
                 int square = candidateMoves[randomIndex];
 
-                MarkSpot(square);
+                this.MarkSpot(square);
                 return square;
             }
             else
             {
-                int moveChoice = LookupSearchMap(boardState);
-                MarkSpot(moveChoice);
+                int moveChoice = this.LookupSearchMap(boardState);
+                this.MarkSpot(moveChoice);
                 return moveChoice;
             }
         }

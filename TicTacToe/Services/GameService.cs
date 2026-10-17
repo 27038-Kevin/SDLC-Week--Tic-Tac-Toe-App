@@ -77,11 +77,11 @@ namespace TicTacToe.Services
 
             var xFilter = new GameSummaryFilter(
                                 mode: mode,
-                                letterPlayed: 'X');
+                                letterPlayed: Letter.X);
 
             var oFilter = new GameSummaryFilter(
                                 mode: mode,
-                                letterPlayed: 'O');
+                                letterPlayed: Letter.O);
 
             var winFilter = new GameSummaryFilter(
                                 mode: mode,
@@ -127,13 +127,13 @@ namespace TicTacToe.Services
 
             if (mode == GameMode.Manual)
             {
-                xPlayer = new HumanPlayer('X', player1Name ?? "Player", this._gameDisplay.GetMoveInput);
-                oPlayer = new HumanPlayer('O', player2Name ?? "Player", this._gameDisplay.GetMoveInput);
+                xPlayer = new HumanPlayer(Letter.X, player1Name ?? "Player", this._gameDisplay.GetMoveInput);
+                oPlayer = new HumanPlayer(Letter.O, player2Name ?? "Player", this._gameDisplay.GetMoveInput);
             }
             else
             {
-                char humanLetter = humanGoesFirst ? 'X' : 'O';
-                char botLetter = humanGoesFirst ? 'O' : 'X';
+                Letter humanLetter = humanGoesFirst ? Letter.X : Letter.O;
+                Letter botLetter = humanGoesFirst ? Letter.O : Letter.X;
 
                 Player human = new HumanPlayer(humanLetter, player1Name ?? "Player", this._gameDisplay.GetMoveInput);
                 Player bot = mode switch

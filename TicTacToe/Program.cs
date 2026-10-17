@@ -22,7 +22,7 @@ namespace TicTacToe
             var gameSerializer = new CsvSerializer<GameSummary>();
             var gameRepository = new GameRepository(directoryPath, gamesFileName, gameSerializer);
             var gameService = new GameService(gameRepository, gameDisplay);
-            var gameController = new GameController(gameService);
+            var gameController = new GameController(gameService, gameDisplay);
 
             var app = new ApplicationController(gameController);
             app.Run();

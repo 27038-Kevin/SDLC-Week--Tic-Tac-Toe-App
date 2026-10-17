@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using TicTacToe.Enums;
 using TicTacToe.Exceptions;
+using TicTacToe.Models.Data;
 using TicTacToe.Models.StateMachines;
 
 namespace TicTacToe.View.GameRenderers
@@ -77,8 +78,7 @@ namespace TicTacToe.View.GameRenderers
 
             if (game.GameStatus != GameStatus.Ongoing)
             {
-                Console.WriteLine("Press any key to continue...");
-                ConsoleUtils.GetKeyPress();
+                ConsoleUtils.PromptContinuation();
             }
             else if (currentPlayerIsHuman)
             {
@@ -139,6 +139,67 @@ namespace TicTacToe.View.GameRenderers
                 Console.SetCursorPosition(originalPosition.Left, originalPosition.Top);
                 Console.WriteLine();
                 Console.SetCursorPosition(originalPosition.Left, originalPosition.Top);
+            }
+        }
+
+        /// <summary>
+        /// Replays a previous game in real time.
+        /// </summary>
+        /// <param name="gameSummary">The game information to re-render the old game.</param>
+        public void ReplayGame(GameSummary gameSummary)
+        {
+            int xState = 0b0;
+            int oState = 0b0;
+            int moveCount = 0;
+
+            foreach (int move in gameSummary.Moves)
+            {
+                ConsoleUtils.ClearScreen();
+                Console.WriteLine($"GAME #{gameSummary.GameNo}");
+                Console.WriteLine();
+
+                if (XToMove())
+                {
+                    Console.WriteLine($"{gameSummary.XPlayer}'s Turn");
+                    Console.WriteLine();
+                    Console.WriteLine(this.DrawBoard(xState, oState, false));
+                    Thread.Sleep(2000); // Simulate delay while displaying game
+                    xState |= 1 << move;
+                }
+                else
+                {
+                    Console.WriteLine($"{gameSummary.OPlayer}'s Turn");
+                    Console.WriteLine();
+                    Console.WriteLine(this.DrawBoard(xState, oState, false));
+                    Thread.Sleep(2000); // Simulate delay while displaying game
+                    oState |= 1 << move;
+                }
+
+                ++moveCount;
+            }
+
+            string outcomeText = gameSummary.GameOutcome switch
+            {
+                GameOutcome.XWon => $"{gameSummary.XPlayer} wins!",
+                GameOutcome.OWon => $"{gameSummary.OPlayer} wins!",
+                GameOutcome.Tie => "The game is a tie!",
+                GameOutcome.Quit => XToMove()
+                    ? $"{gameSummary.XPlayer} quit the game!"
+                    : $"{gameSummary.OPlayer} quit the game!",
+                var unknownEnumValue => unknownEnumValue.ToString(),
+            };
+
+            ConsoleUtils.ClearScreen();
+            Console.WriteLine(outcomeText);
+            Console.WriteLine();
+            Console.WriteLine(this.DrawBoard(xState, oState, false));
+            Console.WriteLine();
+            ConsoleUtils.PromptContinuation();
+            ConsoleUtils.ClearScreen();
+
+            bool XToMove()
+            {
+                return moveCount % 2 == 0;
             }
         }
 

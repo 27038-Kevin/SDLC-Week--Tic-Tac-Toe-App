@@ -8,6 +8,11 @@ namespace TicTacToe
     internal static class Constants
     {
         /// <summary>
+        /// The date format to be used throughout the project. Used where time is not required.
+        /// </summary>
+        internal const string DateFormat = "MM/dd/yyyy";
+
+        /// <summary>
         /// The date-time format to be used throughout the project.
         /// </summary>
         internal const string DateTimeFormat = "MM/dd/yyyy HH:mm";

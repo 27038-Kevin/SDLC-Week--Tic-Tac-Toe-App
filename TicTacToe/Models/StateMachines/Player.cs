@@ -1,4 +1,6 @@
-﻿namespace TicTacToe.Models.StateMachines
+﻿using TicTacToe.Enums;
+
+namespace TicTacToe.Models.StateMachines
 {
     /// <summary>
     /// Represents a player in a tic-tac-toe game, encapsulating the player's state, win conditions, and move logic.
@@ -46,15 +48,9 @@
         /// </summary>
         /// <param name="letter">The letter assigned to the player for the game (X/O).</param>
         /// <param name="name">The name of the player.</param>
-        protected Player(char letter, string name)
+        protected Player(Letter letter, string name)
         {
-            if (letter != 'x' && letter != 'X'
-                && letter != 'o' && letter != 'O')
-            {
-                throw new ArgumentException("Invalid letter!", nameof(letter));
-            }
-
-            this.Letter = char.ToUpper(letter);
+            this.Letter = letter;
             this.Name = name;
         }
 
@@ -62,7 +58,7 @@
         /// Gets the letter the player has to play (X/O).
         /// </summary>
         /// <value>X if the player goes first; O otherwise.</value>
-        public char Letter { get; init; }
+        public Letter Letter { get; init; }
 
         /// <summary>
         /// Gets the player's name.

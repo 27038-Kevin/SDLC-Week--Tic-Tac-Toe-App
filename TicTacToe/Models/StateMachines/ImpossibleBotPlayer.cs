@@ -1,4 +1,6 @@
-﻿namespace TicTacToe.Models.StateMachines
+﻿using TicTacToe.Enums;
+
+namespace TicTacToe.Models.StateMachines
 {
     /// <summary>
     /// A tic-tac-toe bot that plays at the impossible level -- it does not lose.
@@ -11,7 +13,7 @@
         /// Initializes a new instance of the <see cref="ImpossibleBotPlayer"/> class.
         /// </summary>
         /// <param name="letter">The letter assigned to the player (X/O).</param>
-        public ImpossibleBotPlayer(char letter)
+        public ImpossibleBotPlayer(Letter letter)
             : base(letter, BotName)
         {
         }
@@ -43,8 +45,8 @@
                 throw new InvalidOperationException("Cannot get a move after the game has ended");
             }
 
-            int xState = this.Letter == 'X' ? this.State : opponent.State;
-            int oState = this.Letter == 'O' ? this.State : opponent.State;
+            int xState = this.Letter == Letter.X ? this.State : opponent.State;
+            int oState = this.Letter == Letter.O ? this.State : opponent.State;
 
             this.SimulateWait();
 

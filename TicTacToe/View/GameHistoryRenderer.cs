@@ -1,36 +1,57 @@
 ﻿using System.ComponentModel;
 using TicTacToe.Enums;
+using TicTacToe.Helpers;
 using TicTacToe.Models.Data;
 using TicTacToe.View.ListSelector;
 
 namespace TicTacToe.View
 {
-    internal class GameHistory
+    /// <summary>
+    /// Renders the game history dynamically and contains follow-up renders.
+    /// </summary>
+    internal class GameHistoryRenderer
     {
         private const int PageSize = 10;
+        private readonly Action<GameSummary> _replayGame;
         private readonly Paginator<GameSummary> _games;
         private readonly int _pageCount;
 
-        public GameHistory(IEnumerable<GameSummary> games)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GameHistoryRenderer"/> class.
+        /// </summary>
+        /// <param name="games">The list of games to render.</param>
+        /// <param name="replayGame">The renderer used to replay an old game.</param>
+        public GameHistoryRenderer(IEnumerable<GameSummary> games, Action<GameSummary> replayGame)
         {
             this._games = new Paginator<GameSummary>(games, PageSize);
             this._pageCount = (games.Count() + PageSize - 1) / PageSize;
+            this._replayGame = replayGame;
         }
 
-        public void Render()
+        /// <summary>
+        /// Renders the game history on the console.
+        /// </summary>
+        /// <param name="externalKeyboardListeners">
+        /// External listeners for specific actions (e.g.: creating a filter, etc).
+        /// </param>
+        public void Render(params EventHandler<ConsoleKeyInfo?>[] externalKeyboardListeners)
         {
             string[] summaryList = this._games.CurrentPage
                                         .Select(this.SerializeAsRow)
                                         .ToArray();
 
-            using var selector = new Selector(
-                    summaryList,
-                    this.RenderSummaryList,
-                    ConsoleUtils.ClearScreen,
-                    isCancellable: true,
-                    this.KeyPressListener);
+            var keyPressHandlerParams = new List<EventHandler<ConsoleKeyInfo?>> { this.KeyPressListener }
+                                            .Concat(externalKeyboardListeners)
+                                            .ToArray();
 
-            try
+            using var selector = new Selector(
+                summaryList,
+                this.RenderSummaryList,
+                ConsoleUtils.ClearScreen,
+                isCancellable: true,
+                keyPressHandlerParams);
+
+            while (true)
             {
                 while (selector.ViewState == SelectorViewState.Active)
                 {
@@ -43,6 +64,20 @@ namespace TicTacToe.View
 
                     selector.Update(summaryList, null); // Dry refresh to correctly render state, if event handlers were invoked
                 }
+
+                switch (selector.ViewState)
+                {
+                    case SelectorViewState.Selected:
+                        GameSummary selectedGame = this._games.CurrentPage
+                                        .ElementAt(selector.Selection);
+                        this.RenderGameSummary(selectedGame);
+                        break;
+
+                    case SelectorViewState.Cancelled:
+                        return;
+                }
+
+                selector.Reset();
             }
         }
 
@@ -75,6 +110,40 @@ namespace TicTacToe.View
             }
         }
 
+        /// <summary>
+        /// Renders the game summary on the screen.
+        /// </summary>
+        /// <param name="gameSummary">The game summary to render.</param>
+        private void RenderGameSummary(GameSummary gameSummary)
+        {
+            while (true)
+            {
+                ConsoleUtils.ClearScreen();
+                Console.WriteLine($"Game #{gameSummary.GameNo}");
+                Console.WriteLine(gameSummary.DateAndTime.ToString());
+                Console.WriteLine();
+                Console.WriteLine($"X Player: {gameSummary.XPlayer}");
+                Console.WriteLine($"O Player: {gameSummary.OPlayer}");
+                Console.WriteLine($"Game Outcome: {CaseConverter.PascalToTitle(gameSummary.GameOutcome.ToString())}");
+                Console.WriteLine();
+                Console.WriteLine("Press R to watch a live replay of the game,");
+                Console.WriteLine("or press any other key to return.");
+
+                var keyPress = ConsoleUtils.GetKeyPress();
+                if (keyPress.Key != ConsoleKey.R)
+                {
+                    break;
+                }
+
+                this._replayGame(gameSummary);
+            }
+        }
+
+        /// <summary>
+        /// Renders the list of game summaries on the screen.
+        /// </summary>
+        /// <param name="summaryList">The list of game summaries to render.</param>
+        /// <param name="selectedRow">The currently selected row in the list.</param>
         private void RenderSummaryList(IList<string> summaryList, int selectedRow)
         {
             const string label = "Game No.                        Players";
@@ -123,6 +192,12 @@ namespace TicTacToe.View
             }
         }
 
+        /// <summary>
+        /// Serializes a game summary as a displayable row for the summary list render.
+        /// </summary>
+        /// <param name="gameSummary">The game summary to serialize.</param>
+        /// <returns>A serialized line describing the game details briefly.</returns>
+        /// <exception cref="InvalidEnumArgumentException">Thrown if the game outcome is not known.</exception>
         private string SerializeAsRow(GameSummary gameSummary)
         {
             string gameDescription = $"{gameSummary.XPlayer} vs. {gameSummary.OPlayer}";
@@ -137,7 +212,7 @@ namespace TicTacToe.View
                 GameOutcome.OWon => gameSummary.IsOHuman ? '+' : '-',
                 GameOutcome.Tie => '=',
                 GameOutcome.Quit => '~',
-                _ => throw new InvalidEnumArgumentException(nameof(gameSummary.GameOutcome));
+                _ => throw new InvalidEnumArgumentException(nameof(gameSummary.GameOutcome)),
             };
 
             return $" {gameSummary.GameNo,-6}    {gameDescription,-50}    {outcome}";

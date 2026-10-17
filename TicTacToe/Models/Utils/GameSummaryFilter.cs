@@ -23,17 +23,8 @@ namespace TicTacToe.Models.Utils
                 DateTimeRange? range = default,
                 GameMode? mode = default,
                 PlayerOrientedGameOutcome? outcome = default,
-                char? letterPlayed = default)
+                Letter? letterPlayed = default)
         {
-            if (letterPlayed is not null
-                && letterPlayed != 'X'
-                && letterPlayed != 'O')
-            {
-                throw new ArgumentException(
-                    "The letter played should either be 'X' or 'O'",
-                    nameof(letterPlayed));
-            }
-
             this.DateRange = range;
             this.Mode = mode;
             this.Outcome = outcome;
@@ -62,6 +53,6 @@ namespace TicTacToe.Models.Utils
         /// Gets the letter played by the user to filter by.
         /// </summary>
         /// <value>The letter played to filter by; null if not included.</value>
-        public readonly char? LetterPlayed { get; init; }
+        public readonly Letter? LetterPlayed { get; init; }
     }
 }
