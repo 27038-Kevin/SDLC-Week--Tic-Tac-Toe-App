@@ -61,51 +61,6 @@ namespace TicTacToe.Services
         }
 
         /// <summary>
-        /// Generates a stats model for the selected game mode.
-        /// </summary>
-        /// <param name="mode">The game mode to select stats for.</param>
-        /// <returns>The stats model for games played against the computer difficulty level.</returns>
-        /// <exception cref="NotSupportedException">Thrown if there is an attempt to get stats for manual mode.</exception>
-        public GameStats GetStats(GameMode mode)
-        {
-            if (mode == GameMode.Manual)
-            {
-                throw new NotSupportedException("Statistics not calculated for manual mode");
-            }
-
-            var modeFilter = new GameSummaryFilter(mode: mode);
-
-            var xFilter = new GameSummaryFilter(
-                                mode: mode,
-                                letterPlayed: Letter.X);
-
-            var oFilter = new GameSummaryFilter(
-                                mode: mode,
-                                letterPlayed: Letter.O);
-
-            var winFilter = new GameSummaryFilter(
-                                mode: mode,
-                                outcome: PlayerOrientedGameOutcome.Win);
-
-            var lossFilter = new GameSummaryFilter(
-                                mode: mode,
-                                outcome: PlayerOrientedGameOutcome.Loss);
-
-            var tieFilter = new GameSummaryFilter(
-                                mode: mode,
-                                outcome: PlayerOrientedGameOutcome.Tie);
-
-            return new GameStats(
-                    mode,
-                    this._repository.Filter(modeFilter).Count(),
-                    this._repository.Filter(xFilter).Count(),
-                    this._repository.Filter(oFilter).Count(),
-                    this._repository.Filter(winFilter).Count(),
-                    this._repository.Filter(lossFilter).Count(),
-                    this._repository.Filter(tieFilter).Count());
-        }
-
-        /// <summary>
         /// Starts a new game.
         /// </summary>
         /// <param name="mode">The game mode to start the game in. For values, see <see cref="GameMode"/>.</param>
@@ -157,6 +112,51 @@ namespace TicTacToe.Services
             {
                 this._repository.Save(game.ExportSummary());
             }
+        }
+
+        /// <summary>
+        /// Generates a user stats model for the selected game mode.
+        /// </summary>
+        /// <param name="mode">The game mode to select stats for.</param>
+        /// <returns>The user stats for games played against the computer difficulty level.</returns>
+        /// <exception cref="NotSupportedException">Thrown if there is an attempt to get stats for manual mode.</exception>
+        public UserStats GetUserStats(GameMode mode)
+        {
+            if (mode == GameMode.Manual)
+            {
+                throw new NotSupportedException("Statistics are not calculated for manual mode!");
+            }
+
+            var modeFilter = new GameSummaryFilter(mode: mode);
+
+            var xFilter = new GameSummaryFilter(
+                                mode: mode,
+                                letterPlayed: Letter.X);
+
+            var oFilter = new GameSummaryFilter(
+                                mode: mode,
+                                letterPlayed: Letter.O);
+
+            var winFilter = new GameSummaryFilter(
+                                mode: mode,
+                                outcome: PlayerOrientedGameOutcome.Win);
+
+            var lossFilter = new GameSummaryFilter(
+                                mode: mode,
+                                outcome: PlayerOrientedGameOutcome.Loss);
+
+            var tieFilter = new GameSummaryFilter(
+                                mode: mode,
+                                outcome: PlayerOrientedGameOutcome.Tie);
+
+            return new UserStats(
+                    mode,
+                    this._repository.Filter(modeFilter).Count(),
+                    this._repository.Filter(xFilter).Count(),
+                    this._repository.Filter(oFilter).Count(),
+                    this._repository.Filter(winFilter).Count(),
+                    this._repository.Filter(lossFilter).Count(),
+                    this._repository.Filter(tieFilter).Count());
         }
     }
 }

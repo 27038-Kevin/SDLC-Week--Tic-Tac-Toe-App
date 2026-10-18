@@ -5,10 +5,10 @@ namespace TicTacToe.Models.Data
     /// <summary>
     /// Represents the statistics for the user in a particular gamemode.
     /// </summary>
-    internal readonly struct GameStats
+    internal readonly struct UserStats
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GameStats"/> struct.
+        /// Initializes a new instance of the <see cref="UserStats"/> struct.
         /// </summary>
         /// <param name="mode">The mode the stats are selected for.</param>
         /// <param name="totalGames">The total number of games in that specific mode.</param>
@@ -17,7 +17,7 @@ namespace TicTacToe.Models.Data
         /// <param name="gamesWon">The number of games won by the user.</param>
         /// <param name="gamesLost">The number of games lost by the user.</param>
         /// <param name="gamesTied">The number of games tied.</param>
-        public GameStats(
+        public UserStats(
                 GameMode mode,
                 int totalGames,
                 int gamesPlayedAsX,

@@ -1,4 +1,5 @@
 ﻿using TicTacToe.Enums;
+using TicTacToe.Models.Data;
 using TicTacToe.Models.Utils;
 using TicTacToe.Services;
 using TicTacToe.View;
@@ -86,13 +87,19 @@ namespace TicTacToe.Controllers
         /// Allows the user
         /// - to view game history
         /// - apply filters to the game history
+        /// - see user's stats for each gamemode.
         /// - rewatch old games
         /// etc.
         /// </summary>
         internal void ViewGameHistory()
         {
             var getSummaries = () => this._service.GetGames(this.Filter);
-            var gameHistory = new GameHistoryRenderer(getSummaries, this._gameRenderer.ReplayGame);
+            var getStats = () => Enum.GetValues<GameMode>()
+                                    .Where(gameMode => gameMode != GameMode.Manual)
+                                    .Select(this._service.GetUserStats)
+                                    .ToArray();
+
+            var gameHistory = new GameHistoryRenderer(getSummaries, getStats, this._gameRenderer.ReplayGame);
 
             this.OnFilterChange += gameHistory.ReloadGameSummaries;
             gameHistory.Render(this.SetFilter);

@@ -14,20 +14,26 @@ namespace TicTacToe.View
         private const int PageSize = 10;
 
         private readonly Func<IEnumerable<GameSummary>> _getGames;
+        private readonly Func<UserStats[]> _getStats;
         private readonly Action<GameSummary> _replayGame;
 
-        private bool _pageChanged = false;
         private Paginator<GameSummary> _games = default!;
+        private bool _pageChanged = false;
         private int _pageCount;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GameHistoryRenderer"/> class.
         /// </summary>
         /// <param name="getGames">Method that fetches the list of game summaries to render.</param>
+        /// <param name="getStats">Method that fetches the list of game mode statistics to render.</param>
         /// <param name="replayGame">The renderer used to replay an old game.</param>
-        public GameHistoryRenderer(Func<IEnumerable<GameSummary>> getGames, Action<GameSummary> replayGame)
+        public GameHistoryRenderer(
+                Func<IEnumerable<GameSummary>> getGames,
+                Func<UserStats[]> getStats,
+                Action<GameSummary> replayGame)
         {
             this._getGames = getGames;
+            this._getStats = getStats;
             this._replayGame = replayGame;
             this.ReloadGameSummaries(default, EventArgs.Empty);
         }
@@ -136,11 +142,70 @@ namespace TicTacToe.View
                     this._games.PreviousPage();
                     this._pageChanged = true;
                 }
+                else if (keyPress.Value.Key == ConsoleKey.S)
+                {
+                    this.RenderGameStats(this._getStats());
+                }
             }
             catch (InvalidOperationException)
             {
                 // Silently ignore the exception as it does not affect user
             }
+        }
+
+        /// <summary>
+        /// Renders game stats alongside the history.
+        /// </summary>
+        /// <param name="allStats">The list of all gamemode stats to be displayed.</param>
+        private void RenderGameStats(params UserStats[] allStats)
+        {
+            var gameModes = new List<string> { string.Empty };
+            var totalGames = new List<string> { "Total No. of Games Played" };
+            var gamesPlayedAsX = new List<string> { "No. of Games Played as X" };
+            var gamesPlayedAsO = new List<string> { "No. of Games Played as O" };
+            var gamesWon = new List<string> { "No. of Wins" };
+            var gamesLost = new List<string> { "No. of Losses" };
+            var gamesTied = new List<string> { "No. of Ties" };
+            var winRates = new List<string> { "Winrate" };
+            var winLossRatios = new List<string> { "Win/Loss Ratio" };
+
+            foreach (var gameStats in allStats)
+            {
+                gameModes.Add(gameStats.Mode.ToString());
+                totalGames.Add(gameStats.TotalGames.ToString());
+                gamesPlayedAsX.Add(gameStats.GamesPlayedAsX.ToString());
+                gamesPlayedAsO.Add(gameStats.GamesPlayedAsO.ToString());
+                gamesWon.Add(gameStats.GamesWon.ToString());
+                gamesLost.Add(gameStats.GamesLost.ToString());
+                gamesTied.Add(gameStats.GamesTied.ToString());
+                winRates.Add(gameStats.WinRate);
+                winLossRatios.Add(gameStats.WinLossRatio);
+            }
+
+            var alignment = new bool[allStats.Length + 1];
+            alignment[0] = true;
+
+            string statsTable = Table.Generate(
+                    columnHeader: gameModes.ToArray(),
+                    rows: new string[][]
+                    {
+                        totalGames.ToArray(),
+                        gamesPlayedAsX.ToArray(),
+                        gamesPlayedAsO.ToArray(),
+                        gamesWon.ToArray(),
+                        gamesLost.ToArray(),
+                        gamesTied.ToArray(),
+                        winRates.ToArray(),
+                        winLossRatios.ToArray(),
+                    },
+                    alignLeft: alignment);
+
+            ConsoleUtils.ClearScreen();
+            Console.WriteLine("USER STATS");
+            Console.WriteLine();
+            Console.WriteLine(statsTable);
+            Console.WriteLine();
+            ConsoleUtils.PromptContinuation();
         }
 
         /// <summary>
@@ -230,6 +295,7 @@ namespace TicTacToe.View
                 Console.WriteLine("Use left and right arrow keys to navigate between different pages.");
             }
             Console.WriteLine("Press F to select a filter, or to reset selected filters.");
+            Console.WriteLine("Press S to see user stats.");
         }
 
         /// <summary>
