@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using TicTacToe.Enums;
-using TicTacToe.Exceptions;
+﻿using TicTacToe.Enums;
 using TicTacToe.Models.Utils;
 using TicTacToe.Services;
 using TicTacToe.View;
@@ -23,6 +21,11 @@ namespace TicTacToe.Controllers
             this._service = service;
             this._gameRenderer = gameDisplay;
         }
+
+        /// <summary>
+        /// Event triggered whenever there is a filter change.
+        /// </summary>
+        private event EventHandler? OnFilterChange;
 
         /// <summary>
         /// Gets or sets the summary filter to be used.
@@ -83,16 +86,20 @@ namespace TicTacToe.Controllers
         /// Allows the user
         /// - to view game history
         /// - apply filters to the game history
-        /// - see stats
         /// - rewatch old games
         /// etc.
         /// </summary>
         internal void ViewGameHistory()
         {
-            var summaries = this._service.GetGames(this.Filter);
-            // TODO: Rewrite GameHistoryRenderer so that it dynamically refreshes summaries
-            var gameHistory = new GameHistoryRenderer(summaries, this._gameRenderer.ReplayGame);
+            var getSummaries = () => this._service.GetGames(this.Filter);
+            var gameHistory = new GameHistoryRenderer(getSummaries, this._gameRenderer.ReplayGame);
+
+            this.OnFilterChange += gameHistory.ReloadGameSummaries;
             gameHistory.Render(this.SetFilter);
+
+            // Reset filter after render
+            this.Filter = GameSummaryFilter.Empty;
+            this.OnFilterChange -= default;
         }
 
         /// <summary>
@@ -151,6 +158,8 @@ Select a filter to either set or reset it, if it is already set.
                                 gameModeFilter,
                                 gameOutcomeFilter,
                                 letterFilter);
+
+            this.OnFilterChange?.Invoke(this, EventArgs.Empty);
         }
     }
 }

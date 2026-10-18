@@ -105,6 +105,9 @@ namespace TicTacToe.View
             {
                 while (selector.ViewState == SelectorViewState.Active)
                 {
+                    // Dry refresh to render menu, in case it has been cleared
+                    selector.Update(this.MenuLines, null);
+
                     ConsoleKeyInfo keyPress = ConsoleUtils.GetKeyPress();
                     selector.Update(this.MenuLines, keyPress);
                 }

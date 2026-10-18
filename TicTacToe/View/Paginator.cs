@@ -20,9 +20,9 @@
         {
             this._source = source;
             this._pageSize = pageSize;
-            this._maximumPages = ((source.Count() + pageSize - 1) / pageSize) + 1;  // Ceiling division
+            this._maximumPages = (source.Count() + pageSize - 1) / pageSize;  // Ceiling division
 
-            this.CurrentPage = this.NextPage();
+            this.CurrentPage = source.Take(pageSize);
         }
 
         /// <summary>
@@ -50,7 +50,7 @@
         /// <exception cref="InvalidOperationException">Thrown if there are no more pages to access.</exception>
         public IEnumerable<T> NextPage()
         {
-            if (this._pageNumber == this._maximumPages)
+            if (this._pageNumber == this._maximumPages - 1)
             {
                 throw new InvalidOperationException("No more pages available");
             }
@@ -70,7 +70,7 @@
         /// <exception cref="InvalidOperationException">Thrown if already on first page.</exception>
         public IEnumerable<T> PreviousPage()
         {
-            if (this._pageNumber == 1)
+            if (this._pageNumber == 0)
             {
                 throw new InvalidOperationException("No previous pages found");
             }

@@ -43,7 +43,8 @@
         /// <returns>true if the date lies in the range; false otherwise.</returns>
         public readonly bool Contains(DateTime date)
         {
-            return date >= this.Start && date <= this.End;
+            return date.Date >= this.Start.Date
+                && date.Date <= this.End.Date;
         }
     }
 }

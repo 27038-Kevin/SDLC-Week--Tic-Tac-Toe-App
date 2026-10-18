@@ -12,20 +12,37 @@ namespace TicTacToe.View
     internal class GameHistoryRenderer
     {
         private const int PageSize = 10;
+
+        private readonly Func<IEnumerable<GameSummary>> _getGames;
         private readonly Action<GameSummary> _replayGame;
-        private readonly Paginator<GameSummary> _games;
-        private readonly int _pageCount;
+
+        private bool _pageChanged = false;
+        private Paginator<GameSummary> _games = default!;
+        private int _pageCount;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GameHistoryRenderer"/> class.
         /// </summary>
-        /// <param name="games">The list of games to render.</param>
+        /// <param name="getGames">Method that fetches the list of game summaries to render.</param>
         /// <param name="replayGame">The renderer used to replay an old game.</param>
-        public GameHistoryRenderer(IEnumerable<GameSummary> games, Action<GameSummary> replayGame)
+        public GameHistoryRenderer(Func<IEnumerable<GameSummary>> getGames, Action<GameSummary> replayGame)
         {
+            this._getGames = getGames;
+            this._replayGame = replayGame;
+            this.ReloadGameSummaries(default, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Gets the list of game summaries and updates the paginator as well as the page count.
+        /// Implemented as an event handler to be triggered whenever a filter condition changes on the source.
+        /// </summary>
+        /// <param name="sender">The sender of the event. Required parameter.</param>
+        /// <param name="args">The additional event arguments. Required parameter.</param>
+        public void ReloadGameSummaries(object? sender, EventArgs args)
+        {
+            var games = this._getGames();
             this._games = new Paginator<GameSummary>(games, PageSize);
             this._pageCount = (games.Count() + PageSize - 1) / PageSize;
-            this._replayGame = replayGame;
         }
 
         /// <summary>
@@ -55,8 +72,22 @@ namespace TicTacToe.View
             {
                 while (selector.ViewState == SelectorViewState.Active)
                 {
+                    // Dry refresh to render, if cleared
+                    selector.Update(summaryList, null);
+
                     var keyPress = ConsoleUtils.GetKeyPress();
                     selector.Update(summaryList, keyPress);
+
+                    if (selector.ViewState != SelectorViewState.Active)
+                    {
+                        break;
+                    }
+
+                    if (this._pageChanged)
+                    {
+                        selector.Reset();
+                        this._pageChanged = false;
+                    }
 
                     summaryList = this._games.CurrentPage
                                         .Select(this.SerializeAsRow)
@@ -98,10 +129,12 @@ namespace TicTacToe.View
                 if (keyPress.Value.Key == ConsoleKey.RightArrow)
                 {
                     this._games.NextPage();
+                    this._pageChanged = true;
                 }
                 else if (keyPress.Value.Key == ConsoleKey.LeftArrow)
                 {
                     this._games.PreviousPage();
+                    this._pageChanged = true;
                 }
             }
             catch (InvalidOperationException)
@@ -158,9 +191,15 @@ namespace TicTacToe.View
             Console.WriteLine("GAME HISTORY");
             Console.WriteLine();
 
+            if (summaryList is null || !summaryList.Any())
+            {
+                Console.WriteLine("No results found!");
+                return;
+            }
+
             if (this._pageCount > 1)
             {
-                Console.WriteLine($"Page: {this._games.CurrentPageNumber} / {this._pageCount}");
+                Console.WriteLine($"Page: {this._games.CurrentPageNumber + 1} / {this._pageCount}");
             }
 
             Console.WriteLine(label);
@@ -190,6 +229,7 @@ namespace TicTacToe.View
             {
                 Console.WriteLine("Use left and right arrow keys to navigate between different pages.");
             }
+            Console.WriteLine("Press F to select a filter, or to reset selected filters.");
         }
 
         /// <summary>

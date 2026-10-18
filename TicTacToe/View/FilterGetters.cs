@@ -130,7 +130,7 @@ namespace TicTacToe.View
         /// Gets date from the user as input.
         /// </summary>
         /// <param name="dateContext">The context from which the date is being taken.</param>
-        /// <returns>Date on which the amount was incurred as expense/received as income.</returns>
+        /// <returns>Date inputted by the user.</returns>
         private DateTime GetDate(string? dateContext)
         {
             char space = ' ';
@@ -138,7 +138,7 @@ namespace TicTacToe.View
             string message = $"Enter the{dateContextFormat} date ({Constants.DateFormat}):";
 
             Console.WriteLine(message);
-            DateTime recordDate;
+            DateTime date;
 
             do
             {
@@ -149,7 +149,7 @@ namespace TicTacToe.View
                         Constants.DateFormat,
                         Constants.ProjectCulture,
                         DateTimeStyles.None,
-                        out recordDate))
+                        out date))
                 {
                     Console.WriteLine("Please enter the date in the provided format.");
                     continue;
@@ -159,7 +159,7 @@ namespace TicTacToe.View
             }
             while (true);
 
-            return recordDate;
+            return date;
         }
 
         /// <summary>

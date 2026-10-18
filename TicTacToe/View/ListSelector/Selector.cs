@@ -65,6 +65,7 @@ namespace TicTacToe.View.ListSelector
         {
             this._stateTracker.Reset();
             this._viewRefresher.Reset();
+            this.ViewState = SelectorViewState.Active;
         }
 
         /// <summary>

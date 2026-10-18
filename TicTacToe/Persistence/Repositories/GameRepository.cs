@@ -51,18 +51,31 @@ namespace TicTacToe.Persistence.Repositories
                 summaries = filter.Outcome switch
                 {
                     PlayerOrientedGameOutcome.Win => summaries.Where(
-                            game => (game.IsXHuman && game.GameOutcome == GameOutcome.XWon)
-                                || (game.IsOHuman && game.GameOutcome == GameOutcome.OWon)),
+                            game => game.GameMode != GameMode.Manual &&
+                                ((game.IsXHuman && game.GameOutcome == GameOutcome.XWon)
+                                || (game.IsOHuman && game.GameOutcome == GameOutcome.OWon))),
 
                     PlayerOrientedGameOutcome.Loss => summaries.Where(
-                            game => (game.IsXHuman && game.GameOutcome == GameOutcome.OWon)
-                                || (game.IsOHuman && game.GameOutcome != GameOutcome.OWon)),
+                            game => game.GameMode != GameMode.Manual &&
+                                ((game.IsXHuman && game.GameOutcome == GameOutcome.OWon)
+                                || (game.IsOHuman && game.GameOutcome == GameOutcome.XWon))),
 
                     PlayerOrientedGameOutcome.Tie => summaries.Where(game => game.GameOutcome == GameOutcome.Tie),
 
                     PlayerOrientedGameOutcome.Quit => summaries.Where(game => game.GameOutcome == GameOutcome.Quit),
 
                     var _ => throw new InvalidEnumArgumentException(nameof(filter.Outcome)),
+                };
+            }
+
+            if (filter.LetterPlayed is not null)
+            {
+                summaries = summaries.Where(game => game.GameMode != GameMode.Manual);
+                summaries = filter.LetterPlayed switch
+                {
+                    Letter.X => summaries.Where(game => game.IsXHuman),
+                    Letter.O => summaries.Where(game => game.IsOHuman),
+                    var _ => throw new InvalidEnumArgumentException(nameof(filter.LetterPlayed)),
                 };
             }
 
