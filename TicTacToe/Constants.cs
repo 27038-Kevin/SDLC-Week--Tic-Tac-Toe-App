@@ -28,6 +28,16 @@ namespace TicTacToe
         internal const string GamesFileName = "games.csv";
 
         /// <summary>
+        /// The number of iterations done to hash the password using the hashing algorithm.
+        /// </summary>
+        internal const int PasswordHashIterations = 35000;
+
+        /// <summary>
+        /// The number of characters used in the password hash key.
+        /// </summary>
+        internal const int PasswordKeySize = 64;
+
+        /// <summary>
         /// Temporarily-used name for demonstration.
         /// </summary>
         internal const string TempName = "Kevin";
