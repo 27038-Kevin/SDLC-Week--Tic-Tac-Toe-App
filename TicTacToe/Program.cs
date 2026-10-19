@@ -8,8 +8,14 @@ using TicTacToe.View.GameRenderers;
 
 namespace TicTacToe
 {
+    /// <summary>
+    /// Contains the composition root for the main application.
+    /// </summary>
     internal class Program
     {
+        /// <summary>
+        /// Main entry point of the application.
+        /// </summary>
         private static void Main()
         {
             Console.OutputEncoding = Encoding.UTF8;
