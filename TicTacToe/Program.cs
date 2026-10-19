@@ -21,16 +21,16 @@ namespace TicTacToe
             Console.OutputEncoding = Encoding.UTF8;
             Console.CursorVisible = false;
 
+            const string usersFileName = Constants.UsersFileName;
+            const string gamesFileName = Constants.GamesFileName;
+
             string directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Constants.DataDirectoryName);
-            string gamesFileName = Constants.GamesFileName;
+            var userSerializer = new CsvSerializer<User>();
+            var userRepository = new UserRepository(directoryPath, usersFileName, userSerializer);
+            var userService = new UserService(userRepository);
+            var userController = new UserController(userService, directoryPath);
 
-            var gameDisplay = new GameDisplay();
-            var gameSerializer = new CsvSerializer<GameSummary>();
-            var gameRepository = new GameRepository(directoryPath, gamesFileName, gameSerializer);
-            var gameService = new GameService(gameRepository, gameDisplay);
-            var gameController = new GameController(gameService, gameDisplay);
-
-            var app = new ApplicationController(gameController);
+            var app = new ApplicationController(directoryPath, gamesFileName, userController);
             app.Run();
         }
     }

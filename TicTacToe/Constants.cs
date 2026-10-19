@@ -23,9 +23,19 @@ namespace TicTacToe
         internal const string DataDirectoryName = "data";
 
         /// <summary>
+        /// Default name for fall-back.
+        /// </summary>
+        internal const string DefaultName = "Player";
+
+        /// <summary>
         /// The CSV file where the game summaries are stored.
         /// </summary>
         internal const string GamesFileName = "games.csv";
+
+        /// <summary>
+        /// The maximum number of tries allowed for sensitive input before registering failure to take input.
+        /// </summary>
+        internal const int MaximumAllowedInputTries = 3;
 
         /// <summary>
         /// The number of iterations done to hash the password using the hashing algorithm.
@@ -38,9 +48,9 @@ namespace TicTacToe
         internal const int PasswordKeySize = 64;
 
         /// <summary>
-        /// Temporarily-used name for demonstration.
+        /// The CSV file where user details are stored.
         /// </summary>
-        internal const string TempName = "Kevin";
+        internal const string UsersFileName = "users.csv";
 
         /// <summary>
         /// The culture to be used throughout the project.

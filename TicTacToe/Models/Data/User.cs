@@ -9,6 +9,13 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="User"/> class.
         /// </summary>
+        public User()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="User"/> class.
+        /// </summary>
         /// <param name="id">The user's GUID.</param>
         /// <param name="name">The user's name.</param>
         /// <param name="username">The user's username.</param>

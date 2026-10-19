@@ -18,10 +18,11 @@ namespace TicTacToe.Services
         /// Hashes a password string.
         /// </summary>
         /// <param name="password">The password string to hash.</param>
+        /// <param name="salt">The salt used to hash the password. If not included, one is generated.</param>
         /// <returns>The password's hash value.</returns>
-        public static Password HashPassword(string password)
+        public static Password HashPassword(string password, byte[]? salt = default)
         {
-            byte[] salt = RandomNumberGenerator.GetBytes(KeySize);
+            salt ??= RandomNumberGenerator.GetBytes(KeySize);
 
             byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
                             Encoding.UTF8.GetBytes(password),
@@ -40,11 +41,14 @@ namespace TicTacToe.Services
         /// <summary>
         /// Verifies a hash of a user-inputted password against the hashed password stored in the repository.
         /// </summary>
-        /// <param name="inputtedPasswordHash">The hash of the user-inputted password to be verified.</param>
-        /// <param name="originalPasswordHash">The hash of the original password stored in the repository.</param>
+        /// <param name="inputtedPassword">The hash of the user-inputted password to be verified.</param>
+        /// <param name="originalPassword">The hash of the original password stored in the repository.</param>
         /// <returns>Whether or not the entered password matches the original password.</returns>
-        public static bool VerifyPassword(byte[] inputtedPasswordHash, byte[] originalPasswordHash)
+        public static bool VerifyPassword(Password inputtedPassword, Password originalPassword)
         {
+            byte[] inputtedPasswordHash = Convert.FromHexString(inputtedPassword.Hashcode);
+            byte[] originalPasswordHash = Convert.FromHexString(originalPassword.Hashcode);
+
             return CryptographicOperations
                     .FixedTimeEquals(inputtedPasswordHash, originalPasswordHash);
         }

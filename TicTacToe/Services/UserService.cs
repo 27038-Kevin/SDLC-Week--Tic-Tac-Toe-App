@@ -20,24 +20,6 @@ namespace TicTacToe.Services
         }
 
         /// <summary>
-        /// Authenticates a user based on their username and the plaintext password they typed.
-        /// </summary>
-        /// <param name="username">Username the user uses to log in.</param>
-        /// <param name="passwordText">Password typed in by the user.</param>
-        /// <returns>Whether or not the user is authenticated.</returns>
-        internal bool AuthenticateUser(string username, string passwordText)
-        {
-            IEnumerable<string> usernames = this._repository.GetAllUsernames();
-            if (!usernames.Contains(username))
-            {
-                return false;
-            }
-
-            User user = this._repository.GetByUsername(username);
-            return PasswordService.VerifyPassword(passwordText, user.Password);
-        }
-
-        /// <summary>
         /// Deletes a user from the repository.
         /// </summary>
         /// <param name="userId">The GUID of the user.</param>

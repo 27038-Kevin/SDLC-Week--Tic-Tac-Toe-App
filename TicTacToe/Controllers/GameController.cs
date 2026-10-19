@@ -17,16 +17,24 @@ namespace TicTacToe.Controllers
         /// </summary>
         /// <param name="service">The service that runs games and manages game history.</param>
         /// <param name="gameDisplay">The element that renders the game components on the screen.</param>
-        public GameController(GameService service, IGameDisplay gameDisplay)
+        /// <param name="playerName">Name of the player.</param>
+        public GameController(GameService service, IGameDisplay gameDisplay, string playerName)
         {
             this._service = service;
             this._gameRenderer = gameDisplay;
+            this.PlayerName = playerName;
         }
 
         /// <summary>
         /// Event triggered whenever there is a filter change.
         /// </summary>
         private event EventHandler? OnFilterChange;
+
+        /// <summary>
+        /// Gets the player's name.
+        /// </summary>
+        /// <value>The player's name.</value>
+        public string PlayerName { get; private set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the summary filter to be used.
@@ -68,7 +76,7 @@ namespace TicTacToe.Controllers
                     case GameMode.Easy:
                     case GameMode.Medium:
                     case GameMode.Impossible:
-                        player1Name = Constants.TempName;
+                        player1Name = this.PlayerName;
                         letterMenu.RunWithStatelessCancellation(letterMenuHeader, menuFooter, out Letter? letterSelection);
                         if (letterSelection is null)
                         {
@@ -107,6 +115,16 @@ namespace TicTacToe.Controllers
             // Reset filter after render
             this.Filter = GameSummaryFilter.Empty;
             this.OnFilterChange -= default;
+        }
+
+        /// <summary>
+        /// Sets the player's name whenever the player's name event is triggered.
+        /// </summary>
+        /// <param name="eventSender">The sender of the event. This parameter is required.</param>
+        /// <param name="playerName">The player's new name.</param>
+        internal void SetPlayerName(object? eventSender, string? playerName)
+        {
+            this.PlayerName = playerName ?? Constants.DefaultName;
         }
 
         /// <summary>
