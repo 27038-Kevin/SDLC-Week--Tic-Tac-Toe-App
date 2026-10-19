@@ -5,7 +5,7 @@ namespace TicTacToe.Models.Data
     /// <summary>
     /// Stores a user's password securely.
     /// </summary>
-    internal readonly struct Password
+    public readonly struct Password
     {
         private const char Delimiter = ',';
 
