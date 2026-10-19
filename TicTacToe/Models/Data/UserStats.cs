@@ -1,4 +1,5 @@
-﻿using TicTacToe.Enums;
+﻿using System.Transactions;
+using TicTacToe.Enums;
 
 namespace TicTacToe.Models.Data
 {
@@ -78,13 +79,22 @@ namespace TicTacToe.Models.Data
         public readonly int GamesTied { get; init; }
 
         /// <summary>
-        /// Gets the winrate percentage formatted as a string.
+        /// Gets the win rate percentage formatted as a string.
         /// </summary>
         /// <value>
         /// NaN if no games are played, 0 if no games are won;
         /// otherwise, gets the winrate percentage formatted to two decimal places.
         /// </value>
         public readonly string WinRate => $"{(double)this.GamesWon / this.TotalGames * 100:F2}%";
+
+        /// <summary>
+        /// Gets the tie rate percentage formatted as a string.
+        /// </summary>
+        /// <value>
+        /// NaN if no games are played, 0 if no games are tied;
+        /// otherwise, gets the tie rate percentage formatted to two decimal places.
+        /// </value>
+        public readonly string TieRate => $"{(double)this.GamesTied / this.TotalGames * 100:F2}%";
 
         /// <summary>
         /// Gets the win-loss ratio formatted as a string.

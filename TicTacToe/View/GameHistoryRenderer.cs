@@ -166,7 +166,8 @@ namespace TicTacToe.View
             var gamesWon = new List<string> { "No. of Wins" };
             var gamesLost = new List<string> { "No. of Losses" };
             var gamesTied = new List<string> { "No. of Ties" };
-            var winRates = new List<string> { "Winrate" };
+            var winRates = new List<string> { "Win Rate" };
+            var tieRates = new List<string> { "Tie Rate" };
             var winLossRatios = new List<string> { "Win/Loss Ratio" };
 
             foreach (var gameStats in allStats)
@@ -179,6 +180,7 @@ namespace TicTacToe.View
                 gamesLost.Add(gameStats.GamesLost.ToString());
                 gamesTied.Add(gameStats.GamesTied.ToString());
                 winRates.Add(gameStats.WinRate);
+                tieRates.Add(gameStats.TieRate);
                 winLossRatios.Add(gameStats.WinLossRatio);
             }
 
@@ -196,6 +198,7 @@ namespace TicTacToe.View
                         gamesLost.ToArray(),
                         gamesTied.ToArray(),
                         winRates.ToArray(),
+                        tieRates.ToArray(),
                         winLossRatios.ToArray(),
                     },
                     alignLeft: alignment);
