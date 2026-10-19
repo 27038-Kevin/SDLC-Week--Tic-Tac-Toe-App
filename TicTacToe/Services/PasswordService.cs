@@ -38,21 +38,15 @@ namespace TicTacToe.Services
         }
 
         /// <summary>
-        /// Verifies a user-inputted password against the salted and hashed password stored in the repository.
+        /// Verifies a hash of a user-inputted password against the hashed password stored in the repository.
         /// </summary>
-        /// <param name="input">The user-inputted password to be verified.</param>
-        /// <param name="originalPassword">The original password stored in the repository.</param>
+        /// <param name="inputtedPasswordHash">The hash of the user-inputted password to be verified.</param>
+        /// <param name="originalPasswordHash">The hash of the original password stored in the repository.</param>
         /// <returns>Whether or not the entered password matches the original password.</returns>
-        public static bool VerifyPassword(string input, Password originalPassword)
+        public static bool VerifyPassword(byte[] inputtedPasswordHash, byte[] originalPasswordHash)
         {
-            byte[] salt = originalPassword.Salt
-                                .ToArray();
-
-            byte[] hashToCompare = Rfc2898DeriveBytes.Pbkdf2(
-                    input, salt, Iterations, HashAlgorithm, KeySize);
-
             return CryptographicOperations
-                    .FixedTimeEquals(hashToCompare, Convert.FromHexString(originalPassword.Hashcode));
+                    .FixedTimeEquals(inputtedPasswordHash, originalPasswordHash);
         }
     }
 }
