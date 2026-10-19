@@ -5,6 +5,9 @@ using TicTacToe.Models.Utils;
 
 namespace TicTacToe.View
 {
+    /// <summary>
+    /// Contains methods for getting summary filters.
+    /// </summary>
     internal class FilterGetters
     {
         private const string DateFormat = Constants.DateFormat;
@@ -100,6 +103,7 @@ namespace TicTacToe.View
                     }
                     else if (keyPress.Key == ConsoleKey.C)
                     {
+                        ConsoleUtils.ClearScreen();
                         currentFilter = getNewFilter();
                     }
                     else

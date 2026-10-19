@@ -68,11 +68,11 @@ namespace TicTacToe.View
                                             .ToArray();
 
             using var selector = new Selector(
-                summaryList,
-                this.RenderSummaryList,
-                ConsoleUtils.ClearScreen,
-                isCancellable: true,
-                keyPressHandlerParams);
+                    summaryList,
+                    this.RenderSummaryList,
+                    ConsoleUtils.ClearScreen,
+                    isCancellable: true,
+                    keyPressHandlerParams);
 
             while (true)
             {
