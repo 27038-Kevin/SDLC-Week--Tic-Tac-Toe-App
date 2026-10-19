@@ -137,12 +137,10 @@ namespace TicTacToe.View
             string dateContextFormat = (dateContext is not null) ? string.Concat(space, dateContext) : string.Empty;
             string message = $"Enter the{dateContextFormat} date ({Constants.DateFormat}):";
 
-            Console.WriteLine(message);
             DateTime date;
-
-            do
+            while (true)
             {
-                var input = Console.ReadLine()?.Trim() ?? string.Empty;
+                string input = ConsoleUtils.GetLine(message);
 
                 if (!DateTime.TryParseExact(
                         input,
@@ -157,7 +155,6 @@ namespace TicTacToe.View
 
                 break;
             }
-            while (true);
 
             return date;
         }
