@@ -251,9 +251,10 @@ namespace TicTacToe.View
             var outcomeThumbnailColorCode = new Dictionary<char, ConsoleColor>()
             {
                 ['+'] = ConsoleColor.Green,
-                ['-'] = ConsoleColor.Red,
-                ['='] = ConsoleColor.Yellow,
-                ['~'] = ConsoleColor.Gray,
+                ['-'] = ConsoleColor.DarkRed,
+                ['='] = ConsoleColor.DarkYellow,
+                ['~'] = ConsoleColor.DarkGray,
+                [' '] = ConsoleColor.DarkCyan,
             };
 
             Console.WriteLine("GAME HISTORY");
@@ -275,7 +276,7 @@ namespace TicTacToe.View
 
             for (int i = 0; i < summaryList.Count; ++i)
             {
-                char outcomeSymbol = summaryList[i][summaryList[i].Length - 1];
+                char outcomeSymbol = summaryList[i][^1];
 
                 if (i == selectedRow)
                 {
@@ -323,6 +324,11 @@ namespace TicTacToe.View
                 GameOutcome.Quit => '~',
                 _ => throw new InvalidEnumArgumentException(nameof(gameSummary.GameOutcome)),
             };
+
+            if (gameSummary.GameMode == GameMode.Manual)
+            {
+                outcome = ' ';  // Replace with empty token representing unknown outcome
+            }
 
             return $" {gameSummary.GameNo,-6}    {gameDescription,-50}    {outcome}";
         }
