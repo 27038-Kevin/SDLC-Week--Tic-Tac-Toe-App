@@ -103,14 +103,14 @@ namespace TicTacToe.Services
                 oPlayer = humanGoesFirst ? bot : human;
             }
 
-            uint gameNo = (uint)this._repository.GetAll().Count() + 1;
+            uint gameNo = this._repository.GetNextGameNumber();
             var game = new Game(gameNo, xPlayer, oPlayer, mode, this._gameDisplay.RenderGameBoard);
             game.Start();   // Wait for game to end
 
             // Do not save games that were not started in the first place
             if (game.Moves.Any())
             {
-                this._repository.Save(game.ExportSummary());
+                this._repository.Add(game.ExportSummary());
             }
         }
 

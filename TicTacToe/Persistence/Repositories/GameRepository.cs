@@ -93,5 +93,14 @@ namespace TicTacToe.Persistence.Repositories
             return this.GetAll().FirstOrDefault(game => game.GameNo == gameNumber)
                 ?? throw new KeyNotFoundException($"Game with game no. {gameNumber} does not exist");
         }
+
+        /// <summary>
+        /// Gets the game no. for the next game to be added to the repository.
+        /// </summary>
+        /// <returns>The number of game summaries saved in the repository + 1.</returns>
+        internal uint GetNextGameNumber()
+        {
+            return (uint)this.GetAll().Count() + 1;
+        }
     }
 }
