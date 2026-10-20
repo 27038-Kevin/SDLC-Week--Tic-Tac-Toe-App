@@ -57,7 +57,7 @@ namespace TicTacToe.Controllers
             this._gameController = new GameController(
                     gameService,
                     gameDisplay,
-                    this._gameController?.PlayerName ?? Constants.DefaultName);
+                    this._userController.CurrentUser?.Name ?? Constants.DefaultName);
 
             this._userController.OnUserNameChange += this._gameController.SetPlayerName;
             this._userController.RefreshApplication += this.RefreshSession;
@@ -70,7 +70,7 @@ namespace TicTacToe.Controllers
             string header = $"Welcome, {Constants.DefaultName}!";
             string footer = @"
 New around here? Try signing up!
-" + Menu.GetBasicMenuFooter();
+" + Menu.GetBasicMenuFooter(isMenuCancellable: true);
 
             foreach (HomeMenuOption selection in homeMenu.RunPersistently(
                                                     () => header,
