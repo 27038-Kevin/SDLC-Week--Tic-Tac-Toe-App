@@ -86,15 +86,15 @@ namespace TicTacToe.View
         /// Renders the menu on-screen and returns the selected choices.
         /// Used for when the menu needs to persist, rather than returning a single selection.
         /// </summary>
-        /// <param name="menuHeader">The text to be displayed above the menu.</param>
-        /// <param name="menuFooter">The text to be displayed below the menu.</param>
+        /// <param name="generateMenuHeader">The text to be displayed above the menu.</param>
+        /// <param name="generateMenuFooter">The text to be displayed below the menu.</param>
         /// <param name="isMenuCancellable">Whether or not the user can cancel the menu.</param>
         /// <returns>Returns the user's selections from the menu.</returns>
-        public IEnumerable<TMenu> RunPersistently(string menuHeader, string menuFooter, bool isMenuCancellable)
+        public IEnumerable<TMenu> RunPersistently(
+                Func<string> generateMenuHeader,
+                Func<string> generateMenuFooter,
+                bool isMenuCancellable)
         {
-            this.Header = menuHeader;
-            this.Footer = menuFooter;
-
             using var selector = new Selector(
                     this.MenuLines,
                     this.RenderMenu,
@@ -103,6 +103,9 @@ namespace TicTacToe.View
 
             while (selector.ViewState != SelectorViewState.Cancelled)
             {
+                this.Header = generateMenuHeader();
+                this.Footer = generateMenuFooter();
+
                 while (selector.ViewState == SelectorViewState.Active)
                 {
                     // Dry refresh to render menu, in case it has been cleared

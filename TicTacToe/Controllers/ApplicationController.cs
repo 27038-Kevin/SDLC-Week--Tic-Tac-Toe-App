@@ -41,7 +41,8 @@ namespace TicTacToe.Controllers
         }
 
         /// <summary>
-        /// Loads the entire user's data into the application, initializing the game repository and starting up their session.
+        /// Loads the entire user's data into the application, initializing the game repository and firing up their session.
+        /// Acts as a composition root for a user session.
         /// </summary>
         /// <param name="userId">The user ID, needed to load the content of the user's data files.</param>
         private void LoadUserApplication(Guid userId)
@@ -59,6 +60,7 @@ namespace TicTacToe.Controllers
                     this._gameController?.PlayerName ?? Constants.DefaultName);
 
             this._userController.OnUserNameChange += this._gameController.SetPlayerName;
+            this._userController.RefreshApplication += this.RefreshSession;
         }
 
         private void HomeMenu()
@@ -66,12 +68,13 @@ namespace TicTacToe.Controllers
             var homeMenu = new Menu<HomeMenuOption>();
 
             string header = $"Welcome, {Constants.DefaultName}!";
-            string footer = @"New around here? Try signing up!
+            string footer = @"
+New around here? Try signing up!
 " + Menu.GetBasicMenuFooter();
 
             foreach (HomeMenuOption selection in homeMenu.RunPersistently(
-                                                    header,
-                                                    footer,
+                                                    () => header,
+                                                    () => footer,
                                                     isMenuCancellable: true))
             {
                 switch (selection)
@@ -100,10 +103,10 @@ namespace TicTacToe.Controllers
         {
             var mainMenu = new Menu<MainMenuOption>();
 
-            string header = $"{Constants.Greeting}, {this._userController.CurrentUser?.Name ?? Constants.DefaultName}!{Environment.NewLine}{Environment.NewLine}MAIN MENU";
+            var getHeader = () => $"{Constants.Greeting}, {this._userController.CurrentUser?.Name ?? Constants.DefaultName}!{Environment.NewLine}{Environment.NewLine}MAIN MENU";
             string footer = Menu.GetBasicMenuFooter();
 
-            foreach (MainMenuOption selection in mainMenu.RunPersistently(header, footer, false))
+            foreach (MainMenuOption selection in mainMenu.RunPersistently(getHeader, () => footer, false))
             {
                 switch (selection)
                 {
@@ -131,12 +134,29 @@ namespace TicTacToe.Controllers
             }
         }
 
+        private void RefreshSession(object? sender, EventArgs args)
+        {
+            if (!this._userController.IsSessionActive)
+            {
+                return;
+            }
+
+            var currentUserId = this._userController.CurrentUser!.Id;
+            this.UnloadUserApplication();
+            this.LoadUserApplication(currentUserId);
+        }
+
         /// <summary>
         /// Unloads the user application after the user's session ends.
         /// </summary>
         private void UnloadUserApplication()
         {
-            this._userController.OnUserNameChange -= this._gameController!.SetPlayerName;
+            if (this._gameController is null)
+            {
+                return;
+            }
+
+            this._userController.OnUserNameChange -= this._gameController.SetPlayerName;
             this._gameController = default;
         }
     }

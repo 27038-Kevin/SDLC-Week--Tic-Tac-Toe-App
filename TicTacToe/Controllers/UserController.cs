@@ -20,6 +20,7 @@ namespace TicTacToe.Controllers
         }
 
         internal event EventHandler<string>? OnUserNameChange;
+        internal event EventHandler? RefreshApplication;
 
         public User? CurrentUser { get; private set; } = default;
 
@@ -62,7 +63,10 @@ namespace TicTacToe.Controllers
             string menuHeader = "USER ACTIONS";
             string menuFooter = Menu.GetBasicMenuFooter(isMenuCancellable: true);
 
-            foreach (UserOption selection in userMenu.RunPersistently(menuHeader, menuFooter, isMenuCancellable: true))
+            foreach (UserOption selection in userMenu.RunPersistently(
+                                                () => menuHeader,
+                                                () => menuFooter,
+                                                isMenuCancellable: true))
             {
                 switch (selection)
                 {
@@ -100,7 +104,7 @@ namespace TicTacToe.Controllers
 
             for (int tryCount = 1; tryCount <= MaximumAllowedTries; ++tryCount)
             {
-                string username = ConsoleUtils.GetLine("Enter your username:");
+                string username = AuthView.GetUsername(AuthContext.Authentication);
                 bool usernameExists = this._service.DoesUsernameExist(username);
                 if (usernameExists)
                 {
@@ -238,13 +242,18 @@ namespace TicTacToe.Controllers
                                 {
                                     Password hashToCompare = PasswordService.HashPassword(
                                             input, this.CurrentUser!.Password.Salt.ToArray());
-                                    isPasswordSame = PasswordService.VerifyPassword(hashToCompare, this.CurrentUser.Password);
 
-                                    // If the passwords are the same, the hashed value will be discarded regardless
-                                    if (isPasswordSame)
+                                    isPasswordSame = PasswordService.VerifyPassword(hashToCompare, this.CurrentUser.Password);
+                                    policyMarshal.ComplianceStatus = policyMarshal.Policy(input)
+                                                                    ? PolicyCompliance.Compliant
+                                                                    : PolicyCompliance.Incompliant;
+
+                                    // If the conditions aren't met, the hashed value will be discarded regardless
+                                    if (isPasswordSame || policyMarshal.ComplianceStatus == PolicyCompliance.Incompliant)
                                     {
                                         return default;
                                     }
+
 
                                     newPasswordAcquired = true;
                                     return PasswordService.HashPassword(input); // Provide fresh hash with new salt
@@ -253,8 +262,17 @@ namespace TicTacToe.Controllers
 
                 if (isPasswordSame)
                 {
+                    // Triggering password reset rule
                     AuthView.DisplayBadPasswordMessage(
                         AuthContext.Reset,
+                        MaximumAllowedTries,
+                        tryCount);
+                }
+                else if (policyMarshal.ComplianceStatus == PolicyCompliance.Incompliant)
+                {
+                    // Triggering password creation rule
+                    AuthView.DisplayBadPasswordMessage(
+                        AuthContext.Creation,
                         MaximumAllowedTries,
                         tryCount);
                 }
@@ -296,6 +314,8 @@ namespace TicTacToe.Controllers
             this.CurrentUser.Name = ConsoleUtils.GetLine("Enter your new name:");
             this._service.UpdateUser(this.CurrentUser);
             ConsoleUtils.DisplaySuccessMessage($"Your name has been changed to {this.CurrentUser?.Name}!");
+
+            this.OnUserNameChange?.Invoke(this, this.CurrentUser?.Name!);
         }
 
         /// <summary>
@@ -309,7 +329,7 @@ namespace TicTacToe.Controllers
             {
                 Password retypedPassword = AuthView.GetPassword(
                                             AuthContext.Confirmation,
-                                            (input) => PasswordService.HashPassword(input));
+                                            (input) => PasswordService.HashPassword(input, password.Salt.ToArray()));
 
                 bool confirmed = PasswordService.VerifyPassword(retypedPassword, password);
                 if (confirmed)
@@ -369,7 +389,8 @@ Thank you for playing with us!");
             if (confirmation)
             {
                 DataClearanceService.DeleteUserData(this._dataDirectory, this.CurrentUser!.Id);
-                ConsoleUtils.DisplaySuccessMessage("Your data has been wiped and your account reset.");
+                this.RefreshApplication?.Invoke(this, EventArgs.Empty);
+                ConsoleUtils.DisplaySuccessMessage($"{Environment.NewLine}Your data has been wiped and your account reset.");
             }
         }
     }

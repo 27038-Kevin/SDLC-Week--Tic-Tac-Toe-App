@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Text;
 using TicTacToe.Enums;
 using TicTacToe.Models.Data;
@@ -67,6 +66,8 @@ and must not contain any symbols, whitespaces or punctuation marks.";
 
                 case AuthContext.Creation:
                     Console.WriteLine(PasswordRulesViolationMessage);
+                    Console.WriteLine();
+                    ConsoleUtils.PromptContinuation();
                     break;
 
                 case AuthContext.Reset:

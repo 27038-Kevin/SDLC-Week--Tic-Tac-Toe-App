@@ -105,6 +105,7 @@
         internal static void DisplaySuccessMessage(string message)
         {
             Console.WriteLine(message);
+            Console.WriteLine();
             PromptContinuation();
         }
     }

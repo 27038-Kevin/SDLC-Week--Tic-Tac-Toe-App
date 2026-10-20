@@ -263,6 +263,8 @@ namespace TicTacToe.View
             if (summaryList is null || !summaryList.Any())
             {
                 Console.WriteLine("No results found!");
+                Console.WriteLine();
+                Console.WriteLine("Press Esc to return.");
                 return;
             }
 

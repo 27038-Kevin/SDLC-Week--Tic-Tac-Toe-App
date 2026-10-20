@@ -154,8 +154,8 @@ Select a filter to either set or reset it, if it is already set.
             Letter? letterFilter = this.Filter.LetterPlayed;
 
             foreach (FilterOption selection in filterMenu.RunPersistently(
-                                                filterMenuHeader,
-                                                filterMenuFooter,
+                                                () => filterMenuHeader,
+                                                () => filterMenuFooter,
                                                 isMenuCancellable: true))
             {
                 switch (selection)

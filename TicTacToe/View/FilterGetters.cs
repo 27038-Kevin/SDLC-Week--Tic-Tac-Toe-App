@@ -114,6 +114,7 @@ namespace TicTacToe.View
                 else
                 {
                     Console.WriteLine("Filter currently unselected.");
+                    Console.WriteLine();
                     Console.WriteLine("Press A to apply a new filter,");
                     Console.WriteLine("or press any other key to return.");
 
