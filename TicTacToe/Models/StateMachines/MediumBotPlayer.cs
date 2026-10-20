@@ -55,14 +55,13 @@ namespace TicTacToe.Models.StateMachines
              * - A pre-computed state map
              * - A random-heuristic strategy
 
-             * For the first move of the game, the bot will be allowed to refer to the state map in order to avoid walking into forks.
-             * After that, there will be a 50-50 chance of the bot choosing between the state map and the random heuristic to get the next move.
+             * There is a 50-50 chance of the bot choosing between the state map and the random heuristic to get the next move.
              * 1. The random heuristic first checks whether a win is possible. If so, the bot makes the winning move.
              * 2. Next, it checks whether the opponent has a winning move within the next turn. If so, the bot marks that square to prevent the opponent from winning.
              * 3. As a final fall-back mechanism in the random heuristic, the bot will finally mark a square randomly if there are no opportunities for winning or prophylaxis.
 
              * Remarks:
-             * - The bot can be beat if it randomly allows the user to win in the last few moves of the game.
+             * - The bot can be beat if it randomly walks into a fork in the first few moves of the game.
              * - Likewise, the bot can win if the user makes a mistake into a fork within the first two moves of the game, and it randomly finds the fork afterwards.
              * - There is only a 50% probability that it will opt for the random heuristic strategy after the first two moves.
              * - This balances out the shortcomings of the random heuristic approach by drastically reducing its frequency.
@@ -72,13 +71,6 @@ namespace TicTacToe.Models.StateMachines
             var boardState = (xState, oState);
 
             this.SimulateWait();
-
-            if (this._markedSpots == 0)
-            {
-                int moveChoice = this.LookupSearchMap(boardState);
-                this.MarkSpot(moveChoice);
-                return moveChoice;
-            }
 
             // Get a random condition to choose a strategy
             bool randomStrategy = this._random.Next() % 2 == 0;
