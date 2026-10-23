@@ -53,7 +53,7 @@ namespace TicTacToe.Controllers
             var gameRepository = new GameRepository(userFilesDirectory, this._gamesFileName, gameSerializer);
             var gameDisplay = new GameDisplay();
             var gameService = new GameService(gameRepository, gameDisplay);
- 
+
             this._gameController = new GameController(
                     gameService,
                     gameDisplay,
