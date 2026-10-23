@@ -1,5 +1,4 @@
-﻿using System.Transactions;
-using TicTacToe.Enums;
+﻿using TicTacToe.Enums;
 
 namespace TicTacToe.Models.Data
 {

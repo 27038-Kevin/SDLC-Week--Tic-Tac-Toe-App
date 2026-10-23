@@ -53,16 +53,20 @@ namespace TicTacToe.Controllers
             var gameRepository = new GameRepository(userFilesDirectory, this._gamesFileName, gameSerializer);
             var gameDisplay = new GameDisplay();
             var gameService = new GameService(gameRepository, gameDisplay);
-
+ 
             this._gameController = new GameController(
                     gameService,
                     gameDisplay,
                     this._userController.CurrentUser?.Name ?? Constants.DefaultName);
 
             this._userController.OnUserNameChange += this._gameController.SetPlayerName;
-            this._userController.RefreshApplication += this.RefreshSession;
+            this._userController.RefreshUserSession += this.RefreshSession;
         }
 
+        /// <summary>
+        /// Displays the home menu at the start of the application, prompting the user to either login or sign up.
+        /// </summary>
+        /// <exception cref="ApplicationException">Thrown if the user's data hasn't been loaded into memory despite session initiation.</exception>
         private void HomeMenu()
         {
             var homeMenu = new Menu<HomeMenuOption>();
@@ -99,6 +103,9 @@ New around here? Try signing up!
             }
         }
 
+        /// <summary>
+        /// Renders the main menu and controls the flow of the application from the point of the user's selection.
+        /// </summary>
         private void MainMenu()
         {
             var mainMenu = new Menu<MainMenuOption>();
@@ -134,6 +141,11 @@ New around here? Try signing up!
             }
         }
 
+        /// <summary>
+        /// An event handler triggered whenever a session refresh is required to reflect a state change.
+        /// </summary>
+        /// <param name="sender">The sender of the session refresh request.</param>
+        /// <param name="args">Event arguments passed to the handler.</param>
         private void RefreshSession(object? sender, EventArgs args)
         {
             if (!this._userController.IsSessionActive)

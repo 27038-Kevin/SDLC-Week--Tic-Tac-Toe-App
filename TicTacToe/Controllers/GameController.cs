@@ -1,5 +1,4 @@
 ﻿using TicTacToe.Enums;
-using TicTacToe.Models.Data;
 using TicTacToe.Models.Utils;
 using TicTacToe.Services;
 using TicTacToe.View;
@@ -7,6 +6,9 @@ using TicTacToe.View.GameRenderers;
 
 namespace TicTacToe.Controllers
 {
+    /// <summary>
+    /// Contains game and game history-related controls that allow the user to interact freely with the game service.
+    /// </summary>
     internal class GameController
     {
         private readonly GameService _service;

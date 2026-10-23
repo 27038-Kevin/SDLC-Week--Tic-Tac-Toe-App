@@ -6,6 +6,9 @@ using TicTacToe.View;
 
 namespace TicTacToe.Controllers
 {
+    /// <summary>
+    /// Contains controls and user options that the user can perform on their account.
+    /// </summary>
     internal class UserController
     {
         private const int MaximumAllowedTries = Constants.MaximumAllowedInputTries;
@@ -13,17 +16,37 @@ namespace TicTacToe.Controllers
         private readonly UserService _service;
         private readonly string _dataDirectory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserController"/> class.
+        /// </summary>
+        /// <param name="service">The user service which allows the user to perform various actions on their account.</param>
+        /// <param name="dataDirectory">The directory path in which all application persistence data is present.</param>
         public UserController(UserService service, string dataDirectory)
         {
             this._service = service;
             this._dataDirectory = dataDirectory;
         }
 
+        /// <summary>
+        /// Event triggered whenever a user's name is changed or reset.
+        /// </summary>
         internal event EventHandler<string>? OnUserNameChange;
-        internal event EventHandler? RefreshApplication;
 
+        /// <summary>
+        /// Event triggered whenever there is a call for a user session refresh.
+        /// </summary>
+        internal event EventHandler? RefreshUserSession;
+
+        /// <summary>
+        /// Gets the data of the current user loaded into memory during session initiation.
+        /// </summary>
+        /// <value>The current user who is using the application; otherwise, null.</value>
         public User? CurrentUser { get; private set; } = default;
 
+        /// <summary>
+        /// Gets a value indicating whether a session is currently active.
+        /// </summary>
+        /// <value>true if the currently loaded user is not null; false otherwise.</value>
         public bool IsSessionActive => this.CurrentUser is not null;
 
         /// <summary>
@@ -254,7 +277,6 @@ namespace TicTacToe.Controllers
                                         return default;
                                     }
 
-
                                     newPasswordAcquired = true;
                                     return PasswordService.HashPassword(input); // Provide fresh hash with new salt
                                 },
@@ -389,7 +411,7 @@ Thank you for playing with us!");
             if (confirmation)
             {
                 DataClearanceService.DeleteUserData(this._dataDirectory, this.CurrentUser!.Id);
-                this.RefreshApplication?.Invoke(this, EventArgs.Empty);
+                this.RefreshUserSession?.Invoke(this, EventArgs.Empty);
                 ConsoleUtils.DisplaySuccessMessage($"{Environment.NewLine}Your data has been wiped and your account reset.");
             }
         }

@@ -4,7 +4,6 @@ using TicTacToe.Models.Data;
 using TicTacToe.Persistence.Repositories;
 using TicTacToe.Persistence.Serializers;
 using TicTacToe.Services;
-using TicTacToe.View.GameRenderers;
 
 namespace TicTacToe
 {

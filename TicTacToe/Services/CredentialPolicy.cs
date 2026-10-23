@@ -3,7 +3,7 @@
 namespace TicTacToe.Services
 {
     /// <summary>
-    /// Handles authentication/authorization throughout the application.
+    /// Contains policies for authentication/authorization credentials used throughout the application..
     /// </summary>
     internal static class CredentialPolicy
     {
